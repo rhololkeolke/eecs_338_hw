@@ -165,12 +165,58 @@ depart()
 
 ```
 
+semaphore mutex(1)
+int customersInLine = 0;
+time departureTime = 12 AM; // I don't really care about the actual representation of time just assume departureTime starts at 12 AM 
 ```
 
 ### Ticket Agent
 
 ```
+local time l_departureTime = 12 AM;
+local int l_customersInLine = 0;
 
+while(True)
+{
+  // this time the ticket agent can't block until a customer arrives
+  // because it needs to wake up at a certain time
+  while(!within20MinutesOfDeparture(l_departureTime) &&
+        l_customersInLine <= 0)
+  {
+    wait(mutex)
+    l_departureTime = departureTime;
+    l_customersInLine = customersInLine;
+    signal(mutex)
+  }
+  
+  // mark that one customer has been serviced
+  wait(mutex)
+  customersInLine--;
+  l_customersInLine--;
+  signal(mutex)
+  
+  if(within20MinutesOfDeparture(l_departureTime))
+  {
+    // start selling tickets to the ticket waiting line customers
+    
+    wait(mutex)
+    l_departureTime = departureTime;
+    signal(mutex)
+    while(within20MinutesOfDeparture(l_departureTime))
+    {
+      // sell tickets without rules* to main line
+      // no more people should be going to ticket waiting line
+    
+      wait(mutex)
+      l_departureTime = departureTime;
+      signal(mutex)
+    }
+  }
+  else
+  {
+    // sell tickets with Rule*
+  }
+}
 ```
 
 ### Family Head Passenger
