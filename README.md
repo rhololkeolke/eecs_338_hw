@@ -73,9 +73,16 @@ else
   signal(ticketReceived);
 }
 
+// Passengers can block here if they were
+// released from waiting for the nextBus,
+// but the bus hasn't finished reinitializing
+// all of the ticket counters
 wait(busBoardable);
 signal(busBoardable);
 
+// serializes boarding of passsengers
+// assuming that boarding order doesn't matter
+// only ticket sale order matters
 canBoard.wait();
 board();
 canBoard.signal();
@@ -89,7 +96,6 @@ canBoard.signal();
 wait(busLoading);
 load();
 
-signal(ticketsForSale);
 signal(busBoardable);
 
 waitForDepartureTime(); // busy wait until departure time is here
@@ -101,6 +107,17 @@ wait(ticketsForSale); // turn off ticket sales
 wait(busBoardable);
 signal(busLoading);
 
-// TODO: Release waiting passengers
-// TODO: Reset ticket variables
+wait(ticketMutex)
+for(int i=0; i<nextBusTickets; i++)
+{
+  signal(nextBus); // release any waiting passengers
+}
+
+// reset the ticket counters for the next bus
+ticketsSold = nextBusTickets;
+nextBusTickets = 0;
+busSoldOut = False;
+signal(ticketMutex)
+
+signal(ticketsForSale); // let the ticket agent sell tickets again
 ```
