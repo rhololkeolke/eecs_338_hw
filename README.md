@@ -29,8 +29,8 @@ semaphore canBoard(1); // boarding mutex. Only one passenger can board at a time
 ```
 while(True)
 {
-  wait(ticketsForSale); // wait for the tickets for sale
   wait(customerArrived); // wait for a customer to wake up the agent
+  wait(ticketsForSale); // wait for the tickets for sale
   wait(ticketMutex);
   if(ticketsSold == 60)
   {
