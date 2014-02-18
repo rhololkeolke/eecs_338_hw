@@ -18,7 +18,7 @@ bool busSoldOut = False; // True when the current bus's tickets are sold out
 
 semaphore nextBus; // represents waiting area for those who missed the bus
 
-semaphore busLoading(1); // allows a single bus thread to run at a time
+semaphore gateEmpty(1); // allows a single bus thread to run at a time
 semaphore busBoardable(0); // signaled by bus threads
 
 semaphore canBoard(1); // boarding mutex. Only one passenger can board at a time, but order doesn't matter
@@ -93,7 +93,7 @@ canBoard.signal();
 
 ```
 // bus arrives and lets passengers on
-wait(busLoading);
+wait(gateEmpty);
 load();
 
 signal(busBoardable);
@@ -105,7 +105,6 @@ wait(ticketsForSale); // turn off ticket sales
 // TODO: Wait until every ticket has boarded
 
 wait(busBoardable);
-signal(busLoading);
 
 wait(ticketMutex)
 for(int i=0; i<nextBusTickets; i++)
@@ -119,5 +118,10 @@ nextBusTickets = 0;
 busSoldOut = False;
 signal(ticketMutex)
 
-signal(ticketsForSale); // let the ticket agent sell tickets again
+// release the next bus
+signal(gateEmpty);
+// let the ticket agent sell tickets again
+signal(ticketsForSale);
+
+depart()
 ```
