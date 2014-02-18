@@ -22,6 +22,9 @@ semaphore gateEmpty(1); // allows a single bus thread to run at a time
 semaphore busBoardable(0); // signaled by bus threads
 
 semaphore canBoard(1); // boarding mutex. Only one passenger can board at a time, but order doesn't matter
+
+semaphore boardedMutex(1); // mutex for boarding count
+int boarded = 0;
 ```
 
 ## Ticket Agent
@@ -83,15 +86,20 @@ signal(busBoardable);
 // serializes boarding of passsengers
 // assuming that boarding order doesn't matter
 // only ticket sale order matters
-canBoard.wait();
+wait(canBoard);
 board();
-canBoard.signal();
+wait(boardedMutex);
+boarded++
+signal(boardedMutex);
+signal(canBoard);
 
 ```
 
 ## Buses
 
 ```
+local bool allAboard = False;
+
 // bus arrives and lets passengers on
 wait(gateEmpty);
 load();
@@ -102,7 +110,15 @@ waitForDepartureTime(); // busy wait until departure time is here
 
 wait(ticketsForSale); // turn off ticket sales
 
-// TODO: Wait until every ticket has boarded
+// busy wait until all passengers who were sold tickets
+// to this bus have boarded
+while(!allAboard)
+{
+  wait(boardedMutex);
+    if(ticketsSold == boarded)
+      allAboard = True;
+  signal(boardedMutex);
+}
 
 wait(busBoardable);
 
