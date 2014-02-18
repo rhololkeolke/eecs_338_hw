@@ -9,6 +9,7 @@ Homework 2 for EECS 338 - Operating Systems
 semaphore customerArrived(0); // signaled by customer threads blocked on by Ticket Agent
 non-binary semaphore ticketReady(0); // signaled by ticket agent, blocked on by customer
 semaphore ticketReceived(0); // signaled by customer threads blocked on by Ticket Agent
+semaphore ticketsForSale(1); // signaled by bus threads when new bus is ready to board and turned off when bus is readying for departure
 
 semaphore ticketMutex(1); // mutex for the ticket related variables
 int ticketsSold = 0; // number of people riding this bus
@@ -28,6 +29,7 @@ semaphore canBoard(1); // boarding mutex. Only one passenger can board at a time
 ```
 while(True)
 {
+  wait(ticketsForSale); // wait for the tickets for sale
   wait(customerArrived); // wait for a customer to wake up the agent
   wait(ticketMutex);
   if(ticketsSold == 60)
@@ -43,6 +45,7 @@ while(True)
   signal(ticketMutex);
   signal(ticketReady); // tell the customer to grab the ticket
   wait(ticketReceived);
+  signal(ticketsForSale);
 }
 ```
 
@@ -91,6 +94,13 @@ signal(busBoardable);
 
 waitForDepartureTime(); // busy wait until departure time is here
 
+wait(ticketsForSale); // turn off ticket sales
+
+// TODO: Wait until every ticket has boarded
+
 wait(busBoardable);
 signal(busLoading);
+
+// TODO: Release waiting passengers
+// TODO: Reset ticket variables
 ```
