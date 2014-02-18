@@ -89,7 +89,7 @@ canBoard.signal();
 wait(busLoading);
 load();
 
-signal(ticketMutex)
+signal(ticketsForSale);
 signal(busBoardable);
 
 waitForDepartureTime(); // busy wait until departure time is here
