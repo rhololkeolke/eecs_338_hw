@@ -165,7 +165,7 @@ depart()
 
 ```
 
-semaphore mutex(1)
+semaphore ticketModeMutex(1)
 int customersInLine = 0;
 time departureTime = 12 AM; // I don't really care about the actual representation of time just assume departureTime starts at 12 AM 
 ```
@@ -180,41 +180,59 @@ while(True)
 {
   // this time the ticket agent can't block until a customer arrives
   // because it needs to wake up at a certain time
+  wait(ticketModeMutex)
+    l_departureTime = departureTime;
+    l_customersInLine = customersInLine;
+  signal(ticketModeMutex)
   while(!within20MinutesOfDeparture(l_departureTime) &&
         l_customersInLine <= 0)
   {
-    wait(mutex)
+    wait(ticketModeMutex)
     l_departureTime = departureTime;
     l_customersInLine = customersInLine;
-    signal(mutex)
+    signal(ticketModeMutex)
   }
   
   // mark that one customer has been serviced
-  wait(mutex)
+  wait(ticketModeMutex)
   customersInLine--;
   l_customersInLine--;
-  signal(mutex)
+  signal(ticketModeMutex)
   
   if(within20MinutesOfDeparture(l_departureTime))
   {
-    // start selling tickets to the ticket waiting line customers
+    // TODO: start selling tickets to the ticket waiting line customers
     
-    wait(mutex)
+    wait(ticketModeMutex)
     l_departureTime = departureTime;
-    signal(mutex)
+    signal(ticketModeMutex)
     while(within20MinutesOfDeparture(l_departureTime))
     {
-      // sell tickets without rules* to main line
+      // TODO: sell tickets without rules* to main line
       // no more people should be going to ticket waiting line
     
-      wait(mutex)
+      wait(ticketModeMutex)
       l_departureTime = departureTime;
-      signal(mutex)
+      signal(ticketModeMutex)
     }
   }
   else
   {
-    // sell tickets with Rule*
+    // TODO: sell tickets with Rule*
+    wait(ticketsForSale)
+    wait(ticketMutex)
+    // if this is a group/family check if children
+      // if space for familySize/groupSize
+        // sell them familySize/groupSize tickets
+      // else
+        // send them to the waiting line
+    // else if this is a single female
+      // if they fit
+        // sell them a ticket
+      // else
+        // send them to the waiting line
+    // else
+      // send them to the waiting line
   }
 }
 ```
