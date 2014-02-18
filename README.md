@@ -15,6 +15,7 @@ semaphore ticketMutex(1); // mutex for the ticket related variables
 int ticketsSold = 0; // number of people riding this bus
 int nextBusTickets = 0; // number of people waiting for the next bus
 bool busSoldOut = False; // True when the current bus's tickets are sold out
+time departureTime = 12 AM; // don't care about the internal representation just assume it starts by representing 12 AM (i.e. midnight)
 
 semaphore nextBus; // represents waiting area for those who missed the bus
 
@@ -132,6 +133,7 @@ for(int i=0; i<nextBusTickets; i++)
 ticketsSold = nextBusTickets;
 nextBusTickets = 0;
 busSoldOut = False;
+departureTime = departureTime + 3 hours;
 signal(ticketMutex)
 
 // release the next bus
@@ -164,43 +166,25 @@ depart()
 ### Shared Variables
 
 ```
+semaphore wakeTicketAgent(0); // waited on in ticket agent thread. Signaled from customer and bus threads
 
 semaphore ticketModeMutex(1)
-int customersInLine = 0;
 time departureTime = 12 AM; // I don't really care about the actual representation of time just assume departureTime starts at 12 AM 
 ```
 
 ### Ticket Agent
 
 ```
-local time l_departureTime = 12 AM;
-local int l_customersInLine = 0;
-
 while(True)
 {
-  // this time the ticket agent can't block until a customer arrives
-  // because it needs to wake up at a certain time
-  wait(ticketModeMutex)
-    l_departureTime = departureTime;
-    l_customersInLine = customersInLine;
-  signal(ticketModeMutex)
-  while(!within20MinutesOfDeparture(l_departureTime) &&
-        l_customersInLine <= 0)
-  {
-    wait(ticketModeMutex)
-    l_departureTime = departureTime;
-    l_customersInLine = customersInLine;
-    signal(ticketModeMutex)
-  }
+  wait(wakeTicketAgent);
   
-  // mark that one customer has been serviced
   wait(ticketModeMutex)
-  customersInLine--;
-  l_customersInLine--;
-  signal(ticketModeMutex)
   
-  if(within20MinutesOfDeparture(l_departureTime))
+  if(within20MinutesOfDeparture(depatureTime))
   {
+    signal(ticketModeMutex);
+  
     // TODO: start selling tickets to the ticket waiting line customers
     
     wait(ticketModeMutex)
@@ -218,6 +202,8 @@ while(True)
   }
   else
   {
+    signal(ticketModeMutex);
+
     // TODO: sell tickets with Rule*
     wait(ticketsForSale)
     wait(ticketMutex)
@@ -270,5 +256,47 @@ while(True)
 ### Bus
 
 ```
+local bool allAboard = False;
 
+// bus arrives and lets passengers on
+wait(gateEmpty);
+load();
+
+signal(busBoardable);
+
+waitFor20MinutesBeforeDeparture();
+
+signal(wakeTicketAgent); // TODO: Double check this semaphore name matches
+
+waitForDepartureTime();
+
+// TODO: Think of a better way to do this
+while(!allAboard)
+{
+  wait(boardedMutex);
+  if(ticketsSold == boarded)
+    allAboard = true;
+  signal(boardedMutex);
+}
+
+wait(busBoardable);
+
+wait(ticketMutex);
+for(int i=0; i<nextBusTickets; i++)
+{
+  signal(nextBus);
+}
+
+// reset the ticket counters for the next bus
+ticketsSold = nextBusTickets;
+nextBusTickets = 0;
+busSoldOut = False;
+signal(ticketMutex);
+
+//release the next bus
+signal(gateEmpty);
+// let the ticket agent sell tickets again
+signal(ticketsForSale);
+
+depart();
 ```
