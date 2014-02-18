@@ -51,8 +51,8 @@ while(True)
 ```
 signal(customerArrived); // wake up the ticket agent
 wait(ticketReady); // wait for the ticket agent to print the ticket
-Ticket ticket = takeTicket(); // get the ticket from the ticketAgent
 wait(ticketMutex)
+Ticket ticket = takeTicket(); // get the ticket from the ticketAgent
 if(busSoldOut)
 {
   // this customer missed the bus
