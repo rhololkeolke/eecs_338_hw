@@ -141,3 +141,70 @@ signal(ticketsForSale);
 
 depart()
 ```
+
+## Problem 2
+
+### Assumptions
+
+- all tickets are the same (i.e. children and adult tickets are the same), however, ticket agent will only sell tickets to customers based on Rule*. This means tickets for children and adults don't need to be distinguished and the tickets received by the family head can be distributed, in whatever manner they choose.
+- All passenger threads have a unique name
+- each family head creates and shares the following between itself and its family members
+  - int familySize which is equal to the number of family members (including this family head)
+  - familyTickets array which is the same size as familySize. Each index in the array is unique to a family member (based on family member name) and stores the ticket received from the ticket agent for that family member
+  - semaphore familyTicketsReceived(0) which is signaled by the familyHead when the tickets are received
+  - shared waitForNextBus boolean
+- each group head creates and shares the following between itself and its family members
+  - groupSize which is equal to the number of group members (including this group head)
+  - groupTickets array which is the same size as groupSize. Each index in the array is unique to a group member (based on group member name) and stores the ticket received from the ticket agent for that group member
+  - semaphore groupTicketsReceived(0) which is signaled by the group head when the tickets are received
+  - shared waitForNextBus boolean
+- Family head also contains a local boolean called haveChildren which is true when one or more of the family's group are children
+- single passenger threads have a a boolean isFemale which is true when the passenger is a female
+
+### Shared Variables
+
+```
+
+```
+
+### Ticket Agent
+
+```
+
+```
+
+### Family Head Passenger
+
+```
+
+```
+
+### Family Member Passenger
+
+```
+
+```
+
+### Group Head Passenger
+
+```
+
+```
+
+### Group Member Passenger
+
+```
+
+```
+
+### Single Passenger
+
+```
+
+```
+
+### Bus
+
+```
+
+```
