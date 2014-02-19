@@ -309,49 +309,65 @@ signal(canBoard)
 # Bus Thread
 
 ```
-gateEmpty.wait()
+wait(gateEmpty)
 load()
 
-busBoardable.signal()
+signal(busBoardable)
 
-while True:
-    ticketMutex.wait()
-    if(20MinutesBefore(departureTime)):
-        break
-    ticketMutex.signal()
-
-ticketMutex.signal()
-
-ticketEvent.signal()
-
-while True:
-    ticketMutex.wait()
-    if(timeIs(departureTime)):
-        break
-    ticketMutex.signal()
-    
-while True:
-    boardedMutex.wait()
-    if(ticketsSold == boarded)
-        break
-    boardedMutex.signal()
-boardedMutex.signal()
-
-busBoardable.wait()
-
-ticketModeMutex.wait()
-for(int i=0; i<nextBusTickets; i++)
+while(True)
 {
-    nextBus.signal()
+    wait(mutex)
+    if(20MinutesBefore(depatureTime))
+    {
+        // release mutex before continuing.
+        signal(mutex);
+        break;
+    }
+    signal(mutex);
 }
 
-ticketsSold = nextBusTickets
-nextBusTickets = 0
-setNextDepartureTime(departureTime)
-ticketModeMutex.signal()
+signal(ticketEvent);
 
-gateEmpty.signal()
-ticketMutex.signal()
+while(True)
+{
+    wait(mutex);
+    if(isTimeToDepart(departureTime))
+    {
+        // this time keep mutex
+        // need to prevent ticket agent
+        // from modifying ticket variables until next bus
+        break;
+    }
+    signal(mutex);
+}
+
+while(True)
+{
+    wait(canBoard)
+    if(ticketsSold == boarded)
+    {
+        signal(canBoard);
+        break;
+    }
+    signal(canBoard)
+}
+
+wait(busBoardable);
+
+// let all those waiting for the next bus up to the gate
+// busBoardable will prevent them from trying to board this bus
+for(int i=0; i<nextBusTickets; i++)
+{
+    signal(nextBus); 
+}
+
+ticketsSold = nextBusTickets;
+nextBusTickets = 0;
+departureTime = setNextDepatureTime(departureTime);
+signal(mutex);
+
+signal(gateEmpty);
 
 depart()
+
 ```
