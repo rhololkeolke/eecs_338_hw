@@ -84,6 +84,21 @@ load()
 ```
 Does anything necessary for the bus to allow boarding of passengers.
 
+```
+depart()
+```
+Does anything necessary while the bus is heading to NYC
+
+```
+ride()
+```
+Does anything necessary for passengers who are completely seated in the bus.
+
+```
+board()
+```
+Set the passenger to the boarded state.
+
 ## Shared Variables
 
 ```
@@ -165,6 +180,8 @@ wait(canBoard);
 board();
 boarded++;
 signal(canBoard);
+
+ride()
 ```
 
 ## Buses
