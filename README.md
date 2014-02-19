@@ -177,9 +177,12 @@ time departureTime = 12 AM; // I don't really care about the actual representati
 ```
 while(True)
 {
+  // either a passenger or the bus can wake the ticket agent
+  // bus wakes the agent when its within 20 minutes of departure
+  // passengers wake agent when they arrive and wish to purchase a ticket
   wait(wakeTicketAgent);
   
-  wait(ticketModeMutex)
+  wait(ticketModeMutex);
   
   if(within20MinutesOfDeparture(depatureTime))
   {
@@ -187,17 +190,30 @@ while(True)
   
     // TODO: start selling tickets to the ticket waiting line customers
     
-    wait(ticketModeMutex)
-    l_departureTime = departureTime;
-    signal(ticketModeMutex)
-    while(within20MinutesOfDeparture(l_departureTime))
-    {
-      // TODO: sell tickets without rules* to main line
-      // no more people should be going to ticket waiting line
+    // TODO: If there is a customer in line sell a ticket to the main line without Rule*
     
-      wait(ticketModeMutex)
-      l_departureTime = departureTime;
-      signal(ticketModeMutex)
+    // Loop here until the bus has departed
+    local bool waiveRule = True; // used to break out of loop when bus has departed
+    while(waiveRule) // basically while(True) except if the departure time changes the variable will become False
+    {
+      // sleep here just like in the main loop
+      wait(wakeTicketAgent);
+      wait(ticketModeMutex);
+      if(within20MinutesOfDeparture(departureTime))
+      {
+        // TODO: sell tickets without rules* to main line
+        // no more people should be going to ticket waiting line
+    
+        signal(ticketModeMutex);
+      }
+      else
+      {
+        signal(ticketModeMutex);
+        waiveRule = False; // exit this loop
+        
+        // TODO: sell the ticket with Rule*
+        // this has to be here so a customer isn't missed
+      }
     }
   }
   else
