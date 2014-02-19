@@ -44,6 +44,13 @@ enumerated TicketType {CURRENT_BUS, NEXT_BUS, WAIT_FOR_TICKET, SOLD_OUT}
 
 `CURRENT_BUS` and `NEXT_BUS` retain the same meaning as in problem1. `WAIT_FOR_TICKET` tells the customers that they need to step aside and wait to purchase a ticket due to Rule*. `SOLD_OUT` tells the customer that both the current bus and the next bus are completely booked.
 
+`PassengerType` specifies which category of passengers this thread is in.
+
+```
+enumerated PassengerType {MALE, FEMALE, GROUP}
+```
+When a single male passenger the type is `MALE`, when a single female passenger the type is `FEMALE`. When a family or group the type is `GROUP`.
+
 ## Functions
 
 Assume the same functions from problem1 (although not all functions from problem 1 are used in this problem)
@@ -66,124 +73,169 @@ This function returns True when the specified departureTime is 20 minutes or les
 # Shared Variables
 
 ```
-semaphore ticketEvent(0)
-
-semaphore ticketModeMutex(1)
-int ticketLine = 0
-int waitingLine = 0
-time departureTime = 12 AM
+BinarySemaphore ticketEvent(0);
+NonBinarySemaphore mutex(1);
+Time departureTime = 12 AM;
+int numWaiting = 0;
 int ticketsSold = 0
-int nextBusTickets = 0
+int nextBusTickets = 0;
 
-semaphore ticketInfoRequested(0)
-# these get set by customer in middle of purchase
-int numTickets = 0
-bool haveChildren = False
-enumerated sex:{male, female, group} = male
-semaphore ticketInfoProvided(0)
+BinarySemaphore ticketInfoRequest(0);
+BinarySemaphore ticketInfoProvided(0);
+int numTickets = 0;
+PassengerType passengerType = MALE;
+bool hasChildren = False;
 
-semaphore ticketsReady(0)
-# these get set by ticket agent during purchase
-enumerated ticketType:{current, next, soldOut, wait} = current
-bool busSoldOut = False
-Ticket[] tickets = [60] # only the first numTickets have valid data after this is set
-semaphore ticketsReceived(0)
+BinarySemaphore ticketReady(0);
+BinarySemaphore ticketReceived(0);
+TicketType ticketType = CURRENT_BUS;
+Ticket tickets[60];
 
-non-binary semaphore ticketLineOpen(0)
-non-binary semaphore ticketWaitingQueue(0)
-semaphore nextBusQueue(0)
 
-```
+NonBinarySemaphore waitingQueue(0);
 
-I'm assuming each family and group has its own shared semaphores. So family A has a set of semaphores and variables and family B has a set of semaphores and shared variables. Family A's set and family B's set are not the same set. Each family has the following
-
-```
-semaphore distributeTickets(0)
 ```
 
 # Ticket Agent
+
 ```
-while True:
-    ticketEvent.wait()
+while(True)
+{
+    wait(ticketEvent);
     
-    ticketMutex.wait()
-    if(within20Minutes(departureTime)):
-        # if there are customers in the ticket waiting queue
-        # then this is the first time this section has been hit
-        # for this bus
-        if(waitingLine > 0):
-            while(waitingLine > 0):
-                # sell without Rule*
-                ticketWaitingQueue.signal()
-                ticketInfoRequest.signal()
-                ticketInfoProvided.wait()
+    wait(mutex);
+    if(20MinutesBefore(depatureTime))
+    {
+        /* If there are customers in the ticket waiting queue
+         * then this is the first time this section has been hit
+         * for this bus. Therefore drain the ticket waiting queue.
+         */
+         if(numWaiting > 0)
+         {
+            // while there are still people waiting
+            while(numWaiting > 0)
+            {
+                // sell without Rule*
+                signal(waitingQueue);
+                signal(ticketInfoRequest) // tell the customer you want his/her info (e.g. family size)
+                wait(ticketInfoProvided) // wait until the customer has provided the info
                 
-                if(ticketsSold + numTickets > 60):
-                    if(nextBusTickets + numTickets > 60):
-                        ticketType = SOLD_OUT
-                    else:
-                        nextBusTickets = nextBusTickets + numTickets
-                        ticketType = NEXT_BUS
-                else:
-                    ticketsSold = ticketsSold + numTickets
-                    ticketType = CURRENT_BUS
-                    
-                if(ticketType != SOLD_OUT):
-                    # populate the ticket array with the specified number of tickets
-                    printTickets(numTickets)
-                    
-                ticketsReady.signal()
-                ticketsReceived.wait()
+                // if there is no room on this bus
+                if(ticketsSold + numTickets > 60)
+                {
+                    // and there is no room on the next bus
+                    if(nextBusTickets + numTickets > 60)
+                    {
+                        // tell them to give up
+                        ticketType = SOLD_OUT;
+                    }
+                    else
+                    {
+                        // otherwise have them wait for the next bus
+                        nextBusTickets = nextBusTickets + numTickets;
+                        ticketType = NEXT_BUS;
+                    }
+                }
+                else
+                {
+                    // there is still space so give them a ticket
+                    ticketsSold = ticketsSold + numTickets;
+                    ticketType = CURRENT_BUS;
+                }
                 
-                waitingLine--
-        # if ticking waiting queue was drained in previous iteration
-        # it should not fill until next bus arrives. Therefore, every 
-        # time but the first this else code will be run
-        else:
-            # sell ticket without Rule*
-            ticketQueue.signal()
-            ticketInfoRequest.signal()
-            ticketInfoProvided.wait()
-            
-            if(ticketsSold + numTickets > 60):
-                if(nextBusTickets + numTickets > 60):
-                    ticketType = SOLD_OUT
-                else:
-                    nextBusTickets = nextBusTickets + numTickets
-                    ticketType = NEXT_BUS
-            else:
-                ticketsSold = ticketsSold + numTickets
-                ticketType = CURRENT_BUS
-            
-            if(ticketType != SOLD_OUT):
-                # populate the ticket array with the specified number of tickets
-                printTickets(numTickets)
+                if(ticketType != SOLD_OUT)
+                {
+                    // print out numTickets and store them in the tickets array
+                    printTickets(tickets, numTickets);
+                }
                 
-            ticketsReady.signal()
-            ticketsReceived.wait()
-    else:
-        # sell ticket with Rule*
-        ticketQueue.signal()
-        ticketInfoRequest.signal()
-        ticketInfoProvided.wait()
-        if(sex == female or (sex == group and haveChildren)):
-            if(ticketsSold + numTickets > 60):
-                if(nextBusTickets + numTickets > 60):
-                    ticketType = SOLD_OUT
-                else:
-                    nextBusTickets = nextBusTickets + numTickets
-                    ticketType = NEXT_BUS
-            else:
-                ticketsSold = ticketsSold + numTickets
-                ticketType = CURRENT_BUS
-        else:
-            ticketType = WAIT_FOR_TICKET
+                signal(ticketsReady);
+                wait(ticketsReceived);
+                
+                numWaiting--;
+            }
+         }
+         else
+         {
+            // the waiting queue has already been drained for this bus
+            // sell a ticket without Rule*
+            // almost the same as above, but singalling ticketQueue instead of waitingQueue
+            signal(ticketQueue);
+            signal(ticketInfoRequest)
+            wait(ticketInfoProvided)
             
-        if(ticketType != SOLD_OUT and ticketType != WAIT_FOR_TICKET):
-            # populate the ticket array with the specified number of tickets
-            printTickets(numTickets)
             
-    ticketMutex.signal()
+            if(ticketsSold + numTickets > 60)
+            {
+                if(nextBusTickets + numTickets > 60)
+                {
+                    ticketType = SOLD_OUT;
+                }
+                else
+                {
+                    nextBusTickets = nextBusTickets + numTickets;
+                    ticketType = NEXT_BUS;
+                }
+            }
+            else
+            {
+                ticketsSold = ticketsSold + numTickets;
+                ticketType = CURRENT_BUS;
+            }
+            
+            if(ticketType != SOLD_OUT)
+            {
+                printTickets(tickets, numTickets);
+            }
+            
+            signal(ticketsReady);
+            wait(ticketsReceived);
+         }
+    }
+    else
+    {
+        // Rule* applies
+        signal(ticketQueue);
+        signal(ticketInfoRequest)
+        wait(ticketInfoProvided)
+        
+        if(passengerType == FEMALE || (passengerType == GROUP && hasChildren))
+        {
+            if(ticketsSold + numTickets > 60)
+            {
+                if(nextBusTickets + numTickets > 60)
+                {
+                    ticketType = SOLD_OUT;
+                }
+                else
+                {
+                    nextBusTickets = nextBusTickets + numTickets;
+                    ticketType = NEXT_BUS;
+                }
+            }
+            else
+            {
+                ticketsSold = ticketsSold + numTickets;
+                ticketType = CURRENT_BUS;
+            }
+        }
+        else
+        {
+            numWaiting++;
+            ticketType = WAIT_FOR_TICKET;
+        }
+        
+        if(ticketType != SOLD_OUT && ticketType != WAIT_FOR_TICKET)
+        {
+            printTickets(tickets, numTickets)
+        }
+        
+        signal(ticketsReady);
+        wait(ticketsReceived);
+    }
+    
+    mutex.signal();
+}
 ```
 
 # Passenger
