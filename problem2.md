@@ -37,172 +37,88 @@ semaphore distributeTickets(0)
 ```
 
 # Ticket Agent
-
 ```
 while True:
-    # sleep
     ticketEvent.wait()
     
-    ticketModeMutex.wait()
-    # if within 20 minutes of departure
+    ticketMutex.wait()
     if(within20Minutes(departureTime)):
-        
-        ticket
-        # while customers in waiting line
-        while(waitingLine > 0):
-            ticketWaitingQueue.signal()
-            // sell tickets to everyone in the waiting line
-            ticketInfoRequest.signal() # tell customer thread to set shared variables
-            ticketInfoProvided.wait() # wait for customer thread to finish
-            
-            if(ticketsSold + numTickets > 60):
-                if(nextBusTickets + numTickets > 60):
-                    ticketType = soldOut
-                else:
-                    nextBusTickets = nextBusTickets + numTickets
-                    ticketType = next
-            else:
-                ticketsSold = ticketsSold + numTickets
-                ticketType = current
-            
-            if(ticketType != soldOut):
-                # populate the ticket array with the specified number of tickets 
-                printTickets(numTickets)
+        # if there are customers in the ticket waiting queue
+        # then this is the first time this section has been hit
+        # for this bus
+        if(waitingLine > 0):
+            while(waitingLine > 0):
+                # sell without Rule*
+                ticketWaitingQueue.signal()
+                ticketInfoRequest.signal()
+                ticketInfoProvided.wait()
                 
-            ticketsReady.signal()
-            ticketsReceived.wait()
-            
-            waitingLine--
-        
-        # if any customers in ticket line
-        if(ticketLine > 0):
-        # (May be an issue if it takes more than 20 minutes for waiting line customers to be service)
-            ticketLineOpen.signal()
-            # complete one ticket sale without Rule* 
-            ticketInfoRequest.signal() # tell customer thread to set shared variables
-            ticketInfoProvided.wait() # wait for customer thread to finish
-            
-            if(ticketsSold + numTickets > 60):
-                if(nextBusTickets + numTickets > 60):
-                    ticketType = soldOut
-                else:
-                    nextBusTickets = nextBusTickets + numTickets
-                    ticketType = next
-            else:
-                ticketsSold = ticketsSold + numTickets
-                ticketType = current
-            
-            if(ticketType != soldOut):
-                # populate the ticket array with the specified number of tickets 
-                printTickets(numTickets)
-                
-            ticketsReady.signal()
-            ticketsReceived.wait()
-            
-            ticketLine--
-        
-        ticketModeMutex.signal()
-        
-        # while True
-        while True:
-        
-            # sleep
-            ticketEvent.wait()
-            
-            ticketModeMutex.wait()
-            # if still within 20 minutes
-            if(within20Minutes(departureTime)):
-                ticketLineOpen.signal()
-                
-                # complete one ticket sale without Rule*
-                ticketInfoRequest.signal() # tell customer thread to set shared variables
-                ticketInfoProvided.wait() # wait for customer thread to finish
-            
                 if(ticketsSold + numTickets > 60):
                     if(nextBusTickets + numTickets > 60):
-                        ticketType = soldOut
+                        ticketType = SOLD_OUT
                     else:
                         nextBusTickets = nextBusTickets + numTickets
-                        ticketType = next
+                        ticketType = NEXT_BUS
                 else:
                     ticketsSold = ticketsSold + numTickets
-                    ticketType = current
-            
-                if(ticketType != soldOut):
-                    # populate the ticket array with the specified number of tickets 
+                    ticketType = CURRENT_BUS
+                    
+                if(ticketType != SOLD_OUT):
+                    # populate the ticket array with the specified number of tickets
                     printTickets(numTickets)
-                
+                    
                 ticketsReady.signal()
                 ticketsReceived.wait()
                 
-            else:
+                waitingLine--
+        # if ticking waiting queue was drained in previous iteration
+        # it should not fill until next bus arrives. Therefore, every 
+        # time but the first this else code will be run
+        else:
+            # sell ticket without Rule*
+            ticketQueue.signal()
+            ticketInfoRequest.signal()
+            ticketInfoProvided.wait()
             
-                # exit inner loop
-                break
-                
-        # if any customers in ticket line
-        if(ticketLine > 0):
-            ticketLineOpen.signal()
-            # TODO: complete one ticket sale with Rule*
-            ticketInfoRequest.signal() # tell customer thread to set shared variables
-            ticketInfoProvided.wait() # wait for customer thread to finish
-            
-            # these are the classes that can be sold tickets when Rule* is active
-            if(sex == female or (sex == group and haveChidren)):
-            
-                # make sure there is space and if so sell them a ticket
-                if(ticketsSold == 60 or ticketsSold + numTickets > 60):
-                    if(nextBusTickets == 60 or nextBusTickets + numTickets > 60):
-                        ticketType = soldOut
-                    else:
-                        nextBusTickets = nextBusTickets + numTickets
-                        ticketType = next
+            if(ticketsSold + numTickets > 60):
+                if(nextBusTickets + numTickets > 60):
+                    ticketType = SOLD_OUT
                 else:
-                    ticketsSold = ticketsSold + numTickets
-                    ticketType = current
+                    nextBusTickets = nextBusTickets + numTickets
+                    ticketType = NEXT_BUS
             else:
-                ticketType = wait
+                ticketsSold = ticketsSold + numTickets
+                ticketType = CURRENT_BUS
             
-            if(ticketType != soldOut and ticketType != wait):
-                # populate the ticket array with the specified number of tickets 
+            if(ticketType != SOLD_OUT):
+                # populate the ticket array with the specified number of tickets
                 printTickets(numTickets)
                 
             ticketsReady.signal()
             ticketsReceived.wait()
-            
-            ticketLine--
-            
-        ticketModeMutex.signal()
-            
     else:
-        
-        ticketLineOpen.signal()
-        # complete one ticket sale with Rule*
-        
-        ticketInfoRequest.signal() # tell customer thread to set shared variables
-        ticketInfoProvided.wait() # wait for customer thread to finish
-        # these are the classes that can be sold tickets when Rule* is active
-        if(sex == female or (sex == group and haveChidren)):
-        
-            # make sure there is space and if so sell them a ticket
-            if(ticketsSold == 60 or ticketsSold + numTickets > 60):
-                if(nextBusTickets == 60 or nextBusTickets + numTickets > 60):
-                    ticketType = soldOut
+        # sell ticket with Rule*
+        ticketQueue.signal()
+        ticketInfoRequest.signal()
+        ticketInfoProvided.wait()
+        if(sex == female or (sex == group and haveChildren)):
+            if(ticketsSold + numTickets > 60):
+                if(nextBusTickets + numTickets > 60):
+                    ticketType = SOLD_OUT
                 else:
                     nextBusTickets = nextBusTickets + numTickets
-                    ticketType = next
+                    ticketType = NEXT_BUS
             else:
                 ticketsSold = ticketsSold + numTickets
-                ticketType = current
+                ticketType = CURRENT_BUS
         else:
-            ticketType = wait
-        
-        if(ticketType != soldOut and ticketType != wait):
-            # populate the ticket array with the specified number of tickets 
+            ticketType = WAIT_FOR_TICKET
+            
+        if(ticketType != SOLD_OUT and ticketType != WAIT_FOR_TICKET):
+            # populate the ticket array with the specified number of tickets
             printTickets(numTickets)
-                
-        ticketLine--
-        ticketModeMutex.signal()
+            
+    ticketMutex.signal()
 ```
 
 # Passenger
