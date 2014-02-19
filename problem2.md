@@ -85,7 +85,6 @@ int numWaiting = 0;
 int ticketsSold = 0
 int nextBusTickets = 0;
 
-BinarySemaphore ticketInfoRequest(0);
 BinarySemaphore ticketInfoProvided(0);
 int numPassengers = 0;
 PassengerType passengerType = MALE;
@@ -98,7 +97,11 @@ Ticket tickets[60];
 
 
 NonBinarySemaphore waitingQueue(0);
+NonBinarySemaphore ticketQueue(0);
 
+BinarySemaphore gateEmpty(1);
+BinarySemaphore busBoardable(0);
+NonBinarySemaphore canBoard(1);
 ```
 
 # Ticket Agent
@@ -122,7 +125,6 @@ while(True)
             {
                 // sell without Rule*
                 signal(waitingQueue);
-                signal(ticketInfoRequest) // tell the customer you want his/her info (e.g. family size)
                 wait(ticketInfoProvided) // wait until the customer has provided the info
                 
                 // if there is no room on this bus
@@ -166,7 +168,6 @@ while(True)
             // sell a ticket without Rule*
             // almost the same as above, but singalling ticketQueue instead of waitingQueue
             signal(ticketQueue);
-            signal(ticketInfoRequest)
             wait(ticketInfoProvided)
             
             
@@ -201,7 +202,6 @@ while(True)
     {
         // Rule* applies
         signal(ticketQueue);
-        signal(ticketInfoRequest)
         wait(ticketInfoProvided)
         
         if(passengerType == FEMALE || (passengerType == GROUP && hasChildren))
@@ -252,14 +252,13 @@ if(isHead or l_numPassengers == 1)
 {
     signal(ticketEvent);
     wait(ticketQueue);
-    wait(ticketInfoRequested);
-    
+
     numPassengers = l_numPassengers;
     hasChildren = l_hasChildren;
     passengerType = l_passengerType;
     
     signal(ticketInfoProvided);
-    wait(ticketsReady)
+    wait(ticketsReady);
     
     takeTicket(s_tickets, customerName);
     s_ticketType = ticketType;
@@ -269,6 +268,18 @@ if(isHead or l_numPassengers == 1)
     if(s_ticketType == WAIT_FOR_TICKET)
     {
         wait(waitingQueue);
+        
+        numPassengers = l_numPassengers;
+        hasChildren = l_hasChildren;
+        passengerType = l_passengerType;
+        
+        signal(ticketInfoProvided);
+        wait(ticketsReady);
+        
+        takeTicket(s_tickets, customerName);
+        s_ticketType = ticketType;
+        
+        signal(ticketsReceived);
     }
 }
 else
@@ -304,6 +315,7 @@ board();
 boarded++;
 signal(canBoard)
 
+ride();
 ```
 
 # Bus Thread
