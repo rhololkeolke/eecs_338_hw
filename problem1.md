@@ -94,10 +94,16 @@ NonBinarySemaphore ticketReady(0);
 BinarySemaphore ticketReceived(0);
 
 BinarySemaphore mutex(1);
+Time departureTime = 12 AM;
 int ticketsSold = 0;
 int nextBusTickets = 0;
 TicketType ticketType = CURRENT_BUS;
 Ticket ticket;
+
+BinarySemaphore nextBusQueue(0);
+BinarySemaphore busBoardable(0);
+
+BinarySemaphore gateEmpty(1);
 ```
 
 ## Ticket Agent
