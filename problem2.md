@@ -10,9 +10,9 @@ The local variables in each process are assumed to be
 
 ```
 bool isHead
-PassengerType passengerType
-bool hasChildren
-int numPassengers
+PassengerType l_passengerType
+bool l_hasChildren
+int l_numPassengers
 ```
 
 `isHead` is True when the passenger thread is a family or a group head. `passengerType` is `MALE` when a single male passenger, `FEMALE` when a single female passenger, `GROUP` when a group or family. `hasChildren` can only be true in family threads and is True when the family has children associated with it. `numPassengers` specifies how many passengers are in this group/family. For single passengers `numPassengers = 1`.
@@ -22,13 +22,13 @@ int numPassengers
  
 ```
 NonBinarySemaphore distributeTickets(0);
-Ticket p_tickets[numPassengers];
-TicketType p_ticketType = CURRENT_BUS;
+Ticket s_tickets[numPassengers];
+TicketType s_ticketType = CURRENT_BUS;
 ```
 
 `distributeTickets` serializes access to the ticket array. The semaphore is non-binary because when the family head gets updated tickets after having to wait it needs to be guaranteed access to the ticket array and not starved. It does this by joining the non-binary semaphore queue. Additionally the ticket array can only be updated after every family member has read the information and reacted in order to prevent bad states.
 
-`p_tickets` is an array of type Ticket of size `numPassengers`. `p_ticketType` is the current type of the tickets in the `p_tickets` array. Only when `p_ticketType` is `CURRENT_BUS` or `NEXT_BUS` is the information in the `p_tickets` array safe.
+`s_tickets` is an array of type Ticket of size `numPassengers`. `s_ticketType` is the current type of the tickets in the `s_tickets` array. Only when `s_ticketType` is `CURRENT_BUS` or `NEXT_BUS` is the information in the `s_tickets` array safe.
 
 - The ticket agent only ever interacts with family heads, group heads and single passengers. Family heads and group heads distribute their tickets among the processes within that family/group.
 
@@ -61,7 +61,7 @@ printTickets(Ticket[] tickets, int numTickets)
 Same as in problem1 except now instead of returning a single ticket it creates `numTickets` Ticket objects and stores them in the first `numTickets` indices in the specified tickets array. It assumes that the specified array is big enough to hold that many tickets
 
 ```
-takeTicket(Ticket[] tickets)
+takeTicket(Ticket[] tickets, string customerName)
 ```
 This function looks up the ticket index in the array based on the customersName and how many other people are in the family group (for single passengers there are 0 other people). It then fills in its own name in the ticket. The function used to get the index from the name is guaranteed to return a number between [0, numTickets) and be a unique index within the array (i.e. no two customerNames within a family/group will try to access the same index). How this function achieves the mapping is not specified as it is a sequential programming problem.
 
@@ -69,6 +69,11 @@ This function looks up the ticket index in the array based on the customersName 
 bool 20MinutesBefore(Time departureTime)
 ```
 This function returns True when the specified departureTime is 20 minutes or less away.
+
+```
+balk()
+```
+This function ends the process.
 
 # Shared Variables
 
@@ -82,7 +87,7 @@ int nextBusTickets = 0;
 
 BinarySemaphore ticketInfoRequest(0);
 BinarySemaphore ticketInfoProvided(0);
-int numTickets = 0;
+int numPassengers = 0;
 PassengerType passengerType = MALE;
 bool hasChildren = False;
 
@@ -121,10 +126,10 @@ while(True)
                 wait(ticketInfoProvided) // wait until the customer has provided the info
                 
                 // if there is no room on this bus
-                if(ticketsSold + numTickets > 60)
+                if(ticketsSold + numPassengers > 60)
                 {
                     // and there is no room on the next bus
-                    if(nextBusTickets + numTickets > 60)
+                    if(nextBusTickets + numPassengers > 60)
                     {
                         // tell them to give up
                         ticketType = SOLD_OUT;
@@ -132,21 +137,21 @@ while(True)
                     else
                     {
                         // otherwise have them wait for the next bus
-                        nextBusTickets = nextBusTickets + numTickets;
+                        nextBusTickets = nextBusTickets + numPassengers;
                         ticketType = NEXT_BUS;
                     }
                 }
                 else
                 {
                     // there is still space so give them a ticket
-                    ticketsSold = ticketsSold + numTickets;
+                    ticketsSold = ticketsSold + numPassengers;
                     ticketType = CURRENT_BUS;
                 }
                 
                 if(ticketType != SOLD_OUT)
                 {
-                    // print out numTickets and store them in the tickets array
-                    printTickets(tickets, numTickets);
+                    // print out numPassengers tickets and store them in the tickets array
+                    printTickets(tickets, numPassengers);
                 }
                 
                 signal(ticketsReady);
@@ -165,27 +170,27 @@ while(True)
             wait(ticketInfoProvided)
             
             
-            if(ticketsSold + numTickets > 60)
+            if(ticketsSold + numPassengers > 60)
             {
-                if(nextBusTickets + numTickets > 60)
+                if(nextBusTickets + numPassengers > 60)
                 {
                     ticketType = SOLD_OUT;
                 }
                 else
                 {
-                    nextBusTickets = nextBusTickets + numTickets;
+                    nextBusTickets = nextBusTickets + numPassengers;
                     ticketType = NEXT_BUS;
                 }
             }
             else
             {
-                ticketsSold = ticketsSold + numTickets;
+                ticketsSold = ticketsSold + numPassengers;
                 ticketType = CURRENT_BUS;
             }
             
             if(ticketType != SOLD_OUT)
             {
-                printTickets(tickets, numTickets);
+                printTickets(tickets, numPassengers);
             }
             
             signal(ticketsReady);
@@ -201,21 +206,21 @@ while(True)
         
         if(passengerType == FEMALE || (passengerType == GROUP && hasChildren))
         {
-            if(ticketsSold + numTickets > 60)
+            if(ticketsSold + numPassengers > 60)
             {
-                if(nextBusTickets + numTickets > 60)
+                if(nextBusTickets + numPassengers > 60)
                 {
                     ticketType = SOLD_OUT;
                 }
                 else
                 {
-                    nextBusTickets = nextBusTickets + numTickets;
+                    nextBusTickets = nextBusTickets + numPassengers;
                     ticketType = NEXT_BUS;
                 }
             }
             else
             {
-                ticketsSold = ticketsSold + numTickets;
+                ticketsSold = ticketsSold + numPassengers;
                 ticketType = CURRENT_BUS;
             }
         }
@@ -227,7 +232,7 @@ while(True)
         
         if(ticketType != SOLD_OUT && ticketType != WAIT_FOR_TICKET)
         {
-            printTickets(tickets, numTickets)
+            printTickets(tickets, numPassengers)
         }
         
         signal(ticketsReady);
@@ -241,60 +246,63 @@ while(True)
 # Passenger
 
 ```
-# if this is a group/Family head or this is a single passenger
-# initiate the ticket buying process
-if(isHead or l_numTickets == 1):
-    ticketEvent.signal()
-    ticketLineOpen.wait()
-    ticketInfoRequested.wait()
-
-    # copies local variables by value into shared variables read by ticket agent
-    provideTicketInfo(l_numTickets, l_haveChildren, group)
-
-    ticketInfoProvided.signal()
-    ticketsReady.wait()
-
-    # copies by value shared variables into the specified family/group shared variables
-    receiveTickets(s_ticketType, s_tickets)
-
-    ticketsReceived.signal()
-else:
-    # otherwise wait for the tickets to be distributed
-    distributeTickets.wait()
-
-# follow ticket directions
-if(s_ticketType == soldOut):
-    distributeTickets.signal()
-    balk() # exit the process
+// if this is a group/family head or if this is a single passenger
+// then this thread must buy tickets
+if(isHead or l_numPassengers == 1)
+{
+    signal(ticketEvent);
+    wait(ticketQueue);
+    wait(ticketInfoRequested);
     
-# follow ticket directions
-if(s_ticketType == soldOut):
-    distributeTickets.signal()
-    balk() # exit the process
+    numPassengers = l_numPassengers;
+    hasChildren = l_hasChildren;
+    passengerType = l_passengerType;
     
-elif(s_ticketType == wait):
-    distributeTickets.signal()
-    # wait to get ticket
-    ticketWaitingQueue.wait()
-    distributeTickets.wait()
+    signal(ticketInfoProvided);
+    wait(ticketsReady)
     
-if(s_ticketType == next):
-    distributeTickets.signal()
-    # wait in next bus line
-    nextBusQueue.wait()
+    takeTicket(s_tickets, customerName);
+    s_ticketType = ticketType;
     
-distributeTickets.signal()
+    signal(ticketsReceived);
+    
+    if(s_ticketType == WAIT_FOR_TICKET)
+    {
+        wait(waitingQueue);
+    }
+}
+else
+{
+    // wait for the head to come back with tickets
+    wait(distributeTickets);  
+    
+    takeTicket(s_tickets, customerName);
+}
 
-# board current bus
-busBoardable.wait()
-busBoardable.signal()
+if(s_ticketType == SOLD_OUT)
+{
+    signal(distributeTickets);
+    balk(); // exit the process
+}
+else if(s_ticketType == NEXT_BUS)
+{
+    signal(distributeTickets);
+    wait(nextBusQueue);
+    
+}
+else
+{
+    signal(distributeTickets);
+}
 
-canBoard.wait()
-board()
-boardedMutex.wait()
-boarded++
-boardedMutex.signal()
-canBoard.signal()
+// board current bus
+wait(busBoardable); // this is a turnstile controlled by the bus threads
+signal(busBoardable);
+
+wait(canBoard)
+board();
+boarded++;
+signal(canBoard)
 
 ```
 
