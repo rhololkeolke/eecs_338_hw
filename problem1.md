@@ -2,6 +2,7 @@
 
 - each customer process has a local variable called customerName of type `string`
 - assume only the tickets are serviced FCFS, boarding can be done in any order. The reason FCFS is needed for the tickets is to make sure early arrivals get a ticket, but once a passenger gets a ticket it doesn't matter what order they get on the bus because they're guaranteed a seat.
+- break works the same as in C/C++
 
 ## Datatypes
 
