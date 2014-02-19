@@ -1,6 +1,7 @@
 ## Assumptions
 
 - each customer process has a local variable called customerName of type `string`
+- assume only the tickets are serviced FCFS, boarding can be done in any order. The reason FCFS is needed for the tickets is to make sure early arrivals get a ticket, but once a passenger gets a ticket it doesn't matter what order they get on the bus because they're guaranteed a seat.
 
 ## Datatypes
 
@@ -38,9 +39,9 @@ time to at least the resolution of an hour.
 
 ```
 record Ticket
-  Time departureTime
-  int seatNumber
-  string customerName
+  Time departureTime = 12 AM
+  int seatNumber = 0
+  string customerName = ""
 end
 ```
 
@@ -73,4 +74,140 @@ bool isTimeToDepart(Time departureTime)
 
 This function returns true if the time is at or has passed the specified depatureTime.
 
+```
+Time nextDepartureTime(Time departureTime)
+```
+given a departureTime this function computes and returns the departureTime after this one (i.e. 3 hours afterwards)
+
+```
+load()
+```
+Does anything necessary for the bus to allow boarding of passengers.
+
 ## Shared Variables
+
+```
+BinarySemaphore ticketQueue(0);
+
+
+NonBinarySemaphore ticketReady(0);
+BinarySemaphore ticketReceived(0);
+
+BinarySemaphore mutex(1);
+int ticketsSold = 0;
+int nextBusTickets = 0;
+TicketType ticketType = CURRENT_BUS;
+Ticket ticket;
+```
+
+## Ticket Agent
+
+```
+while(True)
+{
+  wait(ticketQueue);
+  wait(mutex);
+  if(ticketsSold == 60)
+  {
+    nextBusTickets++;
+    ticketType = NEXT_BUS;
+  }
+  else
+  {
+    ticketsSold++;
+    ticketType = CURRENT_BUS;
+  }
+  ticket = printTicket(ticketType);
+
+  signal(ticketReady);
+  wait(ticketReceived);
+  signal(mutex);
+}
+```
+
+## Passengers
+
+```
+signal(ticketQueue);
+wait(ticketReady)
+
+/* To get to this point ticket agent must hold
+ * mutex meaning no bus thread can be changing the ticket variables
+ * additionally every other passenger will be blocked on the ticketReady semaphore.
+ * The agent is blocked waiting for this thread to finish with the shared data
+ * meaning it is safe for this thread to access the ticket shared variables
+ * without explicilty holding the mutex */
+local Ticket ticket = takeTicket();
+local TicketType type = ticketType;
+
+signal(ticketReceived);
+if(type == NEXT_BUS)
+{
+  wait(nextBusQueue);
+}
+
+/* Passengers may block here if they are released 
+ * from the nextBusQueue but the next bus hasn't
+ * finished pulling up to the gate to allow boarders
+ */
+wait(busBoardable);
+signal(busBoardable);
+
+/* Serializes the boarding of passengers. But 
+ * don't enforce a FCFS boarding order. */
+wait(canBoard);
+board();
+boarded++;
+signal(canBoard);
+```
+
+## Buses
+
+```
+wait(gateEmpty);
+load();
+
+signal(busBoardable);
+
+while(True)
+{
+  wait(mutex);
+  if(isTimeToDepart(departureTime))
+  {
+    break;
+  }
+  signal(mutex);
+}
+
+// wait until all passengers who were sold tickets to the bus have boarded
+while(True)
+{
+  wait(canBoard);
+    if(ticketsSold == boarded)
+    {
+      signal(canBoard);
+      break;
+    }
+  signal(canBoard);
+}
+
+wait(busBoardable);
+
+// release all passengers to the gate that
+// were waiting for the next bus
+for(int i=0; i<nextBusTickets; i++)
+{
+  signal(nextBusQueue);
+}
+
+// reset the ticket variables for the next bus
+ticketsSold = nextBusTickets;
+nextBusTickets = 0;
+ticketType = CURRENT_BUS;
+departureTime = nextDepartureTime(departureTime);
+signal(mutex);
+
+signal(gateEmpty);
+
+depart();
+```
