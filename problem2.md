@@ -184,33 +184,27 @@ canBoard.signal()
 # Bus Thread
 
 ```
-local bool allAboard = False
-
 gateEmpty.wait()
 load()
 
 busBoardable.signal()
 
 while True:
-    ticketModeMutex.wait()
+    ticketMutex.wait()
     if(20MinutesBefore(departureTime)):
         break
-    ticketModeMutex.signal()
+    ticketMutex.signal()
 
-ticketModeMutex.signal()
+ticketMutex.signal()
 
 ticketEvent.signal()
 
 while True:
-    ticketModeMutex.wait()
+    ticketMutex.wait()
     if(timeIs(departureTime)):
         break
-    ticketModeMutex.signal()
+    ticketMutex.signal()
     
-ticketModeMutex.signal()
-
-ticketsForSale.wait() # TODO: not currently used in this solution
-
 while True:
     boardedMutex.wait()
     if(ticketsSold == boarded)
@@ -232,7 +226,7 @@ setNextDepartureTime(departureTime)
 ticketModeMutex.signal()
 
 gateEmpty.signal()
-ticketsForSale.signal()
+ticketMutex.signal()
 
 depart()
 ```
