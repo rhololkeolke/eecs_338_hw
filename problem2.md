@@ -1,10 +1,11 @@
 ## Assumptions
 
 - same assumptions as in problem unless otherwise noted
-- With Rule* in effect if the customer is eligible for first class tickets first the customer will try to find a seat in the current bus regardless of class. If there is not enough space then the customer will try to find a seat in the next bus regardless of classes left.
+- With Rule* in effect if the customer is eligible for priority tickets the ticket agent will first try to place the customer in a first class seat on the current bus, then second class seats on the current bus. If there is still not enough space then the ticket agent will attempt to place them on the second bus first in first class then in second class if there is not enough space.
     - if the current bus is empty and a family of 5 with children comes then they will take the first 5 first class seats
     - if the current bus has sold all 30 first class seats, but a family of 5 with children comes they will take the first 5 second class seats
     - if the current bus is full (or not enough space for number of tickets requested) and a family of 5 comes they will purchase 5 first class tickets on the next bus. If the next bus has no first class tickets left they will purchase 5 second class tickets on the next bus.
+- With Rule* if a non-priority customer comes (e.g. single male) and there are second class seats available the ticket agent will sell them. However, if they are not available then the non-priority customer will have to enter the waiting queue
 - When Rule* is not in effect the customers will fill up the current and next bus regardless of ticket classes available.
 - There is no difference between a group ticket, a family ticket, a childs ticket, a man's ticket or a female's ticket once purchased. The differences are determined at purchase time. This means the ticket datatype can remain the same as from problem 1.
     - The ticket agent when printing the ticket will assign seats in first and second class based on the type of passenger purchasing. After that point the seat number implicitly determines what class the ticket is in.
