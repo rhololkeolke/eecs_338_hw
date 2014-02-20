@@ -1,6 +1,11 @@
 ## Assumptions
 
 - same assumptions as in problem unless otherwise noted
+- With Rule* in effect if the customer is eligible for first class tickets first the customer will try to find a seat in the current bus regardless of class. If there is not enough space then the customer will try to find a seat in the next bus regardless of classes left.
+    - if the current bus is empty and a family of 5 with children comes then they will take the first 5 first class seats
+    - if the current bus has sold all 30 first class seats, but a family of 5 with children comes they will take the first 5 second class seats
+    - if the current bus is full (or not enough space for number of tickets requested) and a family of 5 comes they will purchase 5 first class tickets on the next bus. If the next bus has no first class tickets left they will purchase 5 second class tickets on the next bus.
+- When Rule* is not in effect the customers will fill up the current and next bus regardless of ticket classes available.
 - There is no difference between a group ticket, a family ticket, a childs ticket, a man's ticket or a female's ticket once purchased. The differences are determined at purchase time. This means the ticket datatype can remain the same as from problem 1.
     - The ticket agent when printing the ticket will assign seats in first and second class based on the type of passenger purchasing. After that point the seat number implicitly determines what class the ticket is in.
 - The only difference between groups and families is that families may have children which give them special ticket purchasing priority
@@ -58,7 +63,7 @@ Assume the same functions from problem1 (although not all functions from problem
 ```
 printTickets(Ticket[] tickets, int numTickets)
 ```
-Same as in problem1 except now instead of returning a single ticket it creates `numTickets` Ticket objects and stores them in the first `numTickets` indices in the specified tickets array. It assumes that the specified array is big enough to hold that many tickets
+Same as in problem1 except now instead of returning a single ticket it creates `numTickets` Ticket objects and stores them in the first `numTickets` indices in the specified tickets array. It assumes that the specified array is big enough to hold that many tickets. The seating algorithm uses up first class tickets first.
 
 ```
 takeTicket(Ticket[] tickets, string customerName)
@@ -82,7 +87,8 @@ BinarySemaphore ticketEvent(0);
 NonBinarySemaphore mutex(1);
 Time departureTime = 12 AM;
 int numWaiting = 0;
-int ticketsSold = 0
+int firstClassTicketsSold = 0;
+int secondClassTicketsSold = 0;
 int nextBusTickets = 0;
 
 BinarySemaphore ticketInfoProvided(0);
@@ -128,7 +134,7 @@ while(True)
                 wait(ticketInfoProvided) // wait until the customer has provided the info
                 
                 // if there is no room on this bus
-                if(ticketsSold + numPassengers > 60)
+                if(firstClassTicketsSold + secondClassTicketsSold + numPassengers > 60)
                 {
                     // and there is no room on the next bus
                     if(nextBusTickets + numPassengers > 60)
@@ -146,7 +152,16 @@ while(True)
                 else
                 {
                     // there is still space so give them a ticket
-                    ticketsSold = ticketsSold + numPassengers;
+                    if(firstClassTicketsSold + numPassengers > 30)
+                    {
+                        local int secondClassPassengers = numPassengers - (30 - firstClassTicketsSold);
+                        firstClassTicketsSold = 30;
+                        secondClassTicketsSold = secondClassTicketsSold + secondClassPassengers;
+                    }
+                    else
+                    {
+                        firstClassTicketsSold = firstClassTicketsSold + numPassengers;
+                    }
                     ticketType = CURRENT_BUS;
                 }
                 
@@ -171,7 +186,7 @@ while(True)
             wait(ticketInfoProvided)
             
             
-            if(ticketsSold + numPassengers > 60)
+            if(firstClassTicketsSold + secondClassTicketsSold + numPassengers > 60)
             {
                 if(nextBusTickets + numPassengers > 60)
                 {
@@ -185,7 +200,17 @@ while(True)
             }
             else
             {
-                ticketsSold = ticketsSold + numPassengers;
+                // there is still space so give them a ticket
+                if(firstClassTicketsSold + numPassengers > 30)
+                {
+                    local int secondClassPassengers = numPassengers - (30 - firstClassTicketsSold);
+                    firstClassTicketsSold = 30;
+                    secondClassTicketsSold = secondClassTicketsSold + secondClassPassengers;
+                }
+                else
+                {
+                    firstClassTicketsSold = firstClassTicketsSold + numPassengers;
+                }
                 ticketType = CURRENT_BUS;
             }
             
@@ -206,7 +231,7 @@ while(True)
         
         if(passengerType == FEMALE || (passengerType == GROUP && hasChildren))
         {
-            if(ticketsSold + numPassengers > 60)
+            if(firstClassTicketsSold + secondClassTicketsSold + numPassengers > 60)
             {
                 if(nextBusTickets + numPassengers > 60)
                 {
@@ -220,14 +245,32 @@ while(True)
             }
             else
             {
-                ticketsSold = ticketsSold + numPassengers;
+                // there is still space so give them a ticket
+                if(firstClassTicketsSold + numPassengers > 30)
+                {
+                    local int secondClassPassengers = numPassengers - (30 - firstClassTicketsSold);
+                    firstClassTicketsSold = 30;
+                    secondClassTicketsSold = secondClassTicketsSold + secondClassPassengers;
+                }
+                else
+                {
+                    firstClassTicketsSold = firstClassTicketsSold + numPassengers;
+                }
                 ticketType = CURRENT_BUS;
             }
         }
         else
         {
-            numWaiting++;
-            ticketType = WAIT_FOR_TICKET;
+            if(secondClassTicketsSold + numPassengers > 30)
+            {
+                numWaiting++;
+                ticketType = WAIT_FOR_TICKET;
+            }
+            else
+            {
+                secondClassTicketsSold = secondClassTicketsSold + numPassengers;
+                ticketType = CURRENT_BUS;
+            }
         }
         
         if(ticketType != SOLD_OUT && ticketType != WAIT_FOR_TICKET)
@@ -373,7 +416,11 @@ for(int i=0; i<nextBusTickets; i++)
     signal(nextBus); 
 }
 
-ticketsSold = nextBusTickets;
+# figure out how many of the next bus tickets overflowed into
+# second class
+secondClassTicketsSold = 30 - (60 - nextBusTickets);
+# then take whatever didn't overflow and those are first class tickets
+firstClassTicketsSold = nextBusTickets - secondClassTicketsSold;
 nextBusTickets = 0;
 departureTime = setNextDepatureTime(departureTime);
 signal(mutex);
