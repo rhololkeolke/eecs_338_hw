@@ -400,7 +400,7 @@ while(True)
 while(True)
 {
     wait(canBoard)
-    if(ticketsSold == boarded)
+    if(firstClassTicketsSold + secondClassTicketsSold == boarded)
     {
         signal(canBoard);
         break;
