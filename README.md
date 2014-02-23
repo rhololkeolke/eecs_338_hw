@@ -1,6 +1,4 @@
-eecs_338_hw2
+eecs_338_hw
 ============
 
-Homework 2 for EECS 338 - Operating Systems
-
-answers are in problem1.md and problem2.md
+Homework for EECS 338 - Operating Systems
