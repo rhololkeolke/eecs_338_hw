@@ -11,6 +11,8 @@ name CustNm = null
 int CB-Avail-SCnt = 60
 int NB-Avail-SCnt = 60
 bool GateEmpty = True
+bool busReady = False
+int numBoarded = 0
 ```
 
 ## Ticket Agent
@@ -21,7 +23,7 @@ while True
     region ticketSales
     {
         # only sell tickets when there are customers in line
-        await(TLineCnt > 0);
+        await(TLineCnt > 0 and busReady);
         
         # sell ticket
         TAReady = True
@@ -87,6 +89,7 @@ region Bus
 {
     await(MyTicket.DeptTime == CB-DeptTime)
     board();
+    numBoarded++;
 }
 
 
@@ -95,19 +98,40 @@ region Bus
 ## Bus Threads
 
 ```
+
 region Bus
 {
+    # assuming all bus threads are running
+    # this prevents two from accepting passengers at the same time
     await(GateEmpty)
     GateEmpty = False;
+    
+    ARRIVE;
+    
+    numBoarded = 0;
     CB-DeptTime = SET-CB-DeptTime();
     NB-DeptTime = SET-NB-DeptTime();
     CB-Avail-SCnt = 60 - NB-Avail-SCnt;
     NB-Avail-SCnt = 60;
 }
+
+region TicketSales
+{
+    busReady = True;
+}
+
 sleepUntil(CB-DeptTime);
+
+region TicketSales
+{
+    await(not SaleInProgress);
+    busReady = False;
+    local numTicketsSold = 60 - CB-Avail-SCnt;
+}
 
 region Bus
 {
+    await(numBoarded == numTicketsSold)
     GateEmpty = True;
 }
 DEPART
