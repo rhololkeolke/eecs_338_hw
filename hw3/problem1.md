@@ -20,10 +20,16 @@ int numBoarded = 0
 ```
 while True
 {
+
+    region Bus
+    {
+        await(busReady);
+    }
+    
     region ticketSales
     {
         # only sell tickets when there are customers in line
-        await(TLineCnt > 0 and busReady);
+        await(TLineCnt > 0);
         
         # sell ticket
         TAReady = True
@@ -87,7 +93,7 @@ region ticketSales
 
 region Bus
 {
-    await(MyTicket.DeptTime == CB-DeptTime)
+    await(MyTicket.DeptTime == CB-DeptTime and busReady)
     board();
     numBoarded++;
 }
@@ -102,7 +108,7 @@ region Bus
 region Bus
 {
     # assuming all bus threads are running
-    # this prevents two from accepting passengers at the same time
+    # this prevents two busses from pulling into the gate and accepting passengers
     await(GateEmpty)
     GateEmpty = False;
     
@@ -113,25 +119,32 @@ region Bus
     NB-DeptTime = SET-NB-DeptTime();
     CB-Avail-SCnt = 60 - NB-Avail-SCnt;
     NB-Avail-SCnt = 60;
-}
-
-region TicketSales
-{
+    
     busReady = True;
 }
 
 sleepUntil(CB-DeptTime);
 
+region Bus
+{
+    # tell the ticket agent the bus is not ready
+    busReady = False
+}
+    
 region TicketSales
 {
+    # wait until the ticket sales are finished
     await(not SaleInProgress);
-    busReady = False;
+    
+    # remember the number of tickets sold
     local numTicketsSold = 60 - CB-Avail-SCnt;
 }
 
 region Bus
 {
+    # wait until everyone boards
     await(numBoarded == numTicketsSold)
+    # let the next bus into the gate
     GateEmpty = True;
 }
 DEPART
