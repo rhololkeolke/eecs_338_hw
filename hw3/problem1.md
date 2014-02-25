@@ -60,7 +60,7 @@ while True
         }
     }
     
-    region ticketSales
+    region TicketSales
     {
         IssuedTicket = lIssuedTicket;
         SaleInProgress = False;
@@ -73,7 +73,7 @@ while True
 ## Passenger Threads
 
 ```
-region ticketSales
+region TicketSales
 {
     TLineCnt++
     await(TAReady and not SaleInProgress);
@@ -83,7 +83,7 @@ region ticketSales
     CustNm := MyName;
 }
 
-region ticketSales
+region TicketSales
 {
     # tell the ticket agent the customer is ready
     CReady = True;
