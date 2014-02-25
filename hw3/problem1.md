@@ -1,4 +1,3 @@
-
 # Question 2
 
 ## Shared Variables
@@ -135,13 +134,13 @@ region TicketSales
 {
     # wait until the ticket sales are finished
     await(not SaleInProgress);
-    
-    # remember the number of tickets sold
-    local numTicketsSold = 60 - CB-Avail-SCnt;
 }
 
 region Bus
 {
+    # remember the number of tickets sold
+    local numTicketsSold = 60 - CB-Avail-SCnt;
+    
     # wait until everyone boards
     await(numBoarded == numTicketsSold)
     # let the next bus into the gate
