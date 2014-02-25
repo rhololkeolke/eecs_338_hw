@@ -12,11 +12,14 @@ int NB-Avail-SCnt = 60
 bool GateEmpty = True
 bool busReady = False
 int numBoarded = 0
+Ticket IssuedTicket = null;
 ```
 
 ## Ticket Agent
 
 ```
+local Ticket lIssuedTicket = null;
+local name Name = null;
 while True
 {
 
@@ -25,7 +28,7 @@ while True
         await(busReady);
     }
     
-    region ticketSales
+    region TicketSales
     {
         # only sell tickets when there are customers in line
         await(TLineCnt > 0);
@@ -34,31 +37,32 @@ while True
         TAReady = True
     }
     
-    region ticketSales
+    region TicketSales
     {
         # wait until the customer is ready
         await(CReady);
         CReady = False;
+        
+        Name := CustNm;
     }
     
     region Bus
     {
         if(CB-Avail-SCnt != 0)
         {
-            Name := CustNm;
-            IssuedTicket := CB-Ticket(Name);
+            lIssuedTicket := CB-Ticket(Name);
             CB-Avail-SCnt--;
         }
         else
         {
-            Name := CustNm;
-            IssuedTicket := NB-Ticket(Name);
+            lIssuedTicket := NB-Ticket(Name);
             NB-Avail-SCnt--
         }
     }
     
     region ticketSales
     {
+        IssuedTicket = lIssuedTicket;
         SaleInProgress = False;
         ticketReady = True;
         TLineCnt--;
@@ -76,9 +80,8 @@ region ticketSales
     # only allow one passenger through
     TAReady = False;
     SaleInProgress = True;
+    CustNm := MyName;
 }
-
-CustNm := MyName;
 
 region ticketSales
 {
