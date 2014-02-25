@@ -26,25 +26,23 @@ Monitor GreyHoundStop
         {
             TLine.wait();
         }
-        
-        TAReady = True;
-        cTAReady.signal();
+        NextCustomer.signal();
     }
     
     // called by customer
     procedure requestTicket()
     {
-        if(TAReady == False or SaleInProgress)
+        TLineCnt++;
+        TLine.signal();
+        
+        if(SaleInProgress)
         {
-            cTAReady.wait()
+            NextCustomer.wait();
         }
         
-        TAReady = False;
         SaleInProgress = True;
-        CustNm = MyName;
         
-        CReady = True;
-        cCReady.signal();
+        CustNm = MyName;
         
         if(IssuedTicket == null)
         {
@@ -54,18 +52,13 @@ Monitor GreyHoundStop
         MyTicket = IssuedTicket;
         IssuedTicket = null;
         SaleInProgress = False;
+        TLineCnt--
     }
     
     // called by TA
     procedure printTicket()
     {
-        if(not CReady)
-        {
-            cCReady.wait();
-        }
-        
-        CReady = False;
-        
+
         if(not busReady)
         {
             cBusReady.wait()
