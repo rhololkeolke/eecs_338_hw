@@ -23,6 +23,8 @@ in FCFS order.
 
 Notes: `await` is optional and without the region is just a CR. It still operates with ME, but will never block inside
 
+The keyword `local` denotes that the variable is local to the thread it is declared in.
+
 ## Assumptions
 
 I'm assuming that while the tickets must be sold on a FCFS basis, the actual order of 
@@ -35,7 +37,23 @@ issue where a passenger receives a ticket and then leaves the CPU before boardin
 wants to depart. If the bus did not wait then the passenger would not have a valid ticket. And the passenger
 can't get on the next bus because the next bus may be oversold (and it wouldn't be FCFS then anyways).
 
+It is assumed that each passenger thread has a local variable `name MyName`.
+
+`CB-Ticket(name Name)` returns a Ticket object with the specified name as the customer name for the current bus. Automaticlly specifies the depature time and seat number. `NB-Ticket(name Name)` returns a Ticket object with the specified name as the customer name for the next bus. Automatically specifies the departure time and seat number.
+`SET-CB-DeptTime()` calculates and returns the current bus's departure time.
+`SET-NB-DeptTime()` calculates and returns the next bus's departure time.
+
 ## Shared Variables
+
+The ticket type is defined as
+```
+record Ticket
+{
+    name CustName;
+    time DeptTime;
+    int SeatNumber;
+}
+```
 
 ```
 int TLineCnt = 0
@@ -141,7 +159,7 @@ region Bus
 ## Bus Threads
 
 ```
-
+local time dept_time;
 region Bus
 {
     # assuming all bus threads are running
@@ -158,9 +176,11 @@ region Bus
     NB-Avail-SCnt = 60;
     
     busReady = True;
+    
+    dept_time = CB-DeptTime;
 }
 
-sleepUntil(CB-DeptTime);
+sleepUntil(dept_time);
 
 region Bus
 {
