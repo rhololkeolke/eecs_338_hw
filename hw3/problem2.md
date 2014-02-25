@@ -43,6 +43,7 @@ condition <name>
 
 Where `<name>` specifies the condition variables name. condition variables can be called with `<name>.signal()` which signals the condition variable and `<name>.wait()` which blocks on the condition variable.
 
+The keyword `local` denotes that the variable is local to the thread it is declared in.
 
 ## Assumptions
 
@@ -51,10 +52,6 @@ That is when signal is called on a condition variable, if
 there is a process blocked on that condition variable the caller blocks
 until the callee either finishes the procedure or calls wait agian. This assumption
 is applied recursively in the event of multiple signals being called before a wait or end of a procedure.
-
-The keyword `local` denotes that the variable is local to the thread it is declared in.
-
-## Assumptions
 
 I'm assuming that while the tickets must be sold on a FCFS basis, the actual order of 
 bus boarding does not matter. So the race condition that occurs in the passenger threads between the
