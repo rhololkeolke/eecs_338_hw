@@ -63,7 +63,6 @@ while True
     region TicketSales
     {
         IssuedTicket = ticket;
-        SaleInProgress = False;
         ticketReady = True;
         TLineCnt--;
     }
@@ -89,6 +88,7 @@ region TicketSales
     CReady = True;
     await(ticketReady);
     ticketReady = False;
+    SaleInProgress = False;
     
     MyTicket = IssuedTicket;
 }
