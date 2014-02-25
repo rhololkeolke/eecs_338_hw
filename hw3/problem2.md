@@ -77,6 +77,58 @@ Monitor GreyHoundStop
         
         TicketReady.signal();
     }
+    
+    // called by passengers
+    procedure boardBus(Ticket MyTicket)
+    {
+        if(MyTicket.dept_time != CB-DeptTime)
+        {
+            NextBusBoarding.wait()
+        }
+        board()
+        boarded++;
+        AnotherBoarded.signal();
+    }
+    
+    // called by bus
+    procedure arrive()
+    {
+        if(not GateEmpty)
+        {
+            NextBusArriving.wait()
+        }
+        
+        GateEmpty = False;
+        
+        ARRIVE;
+        
+        # let all of the waiting passengers board
+        CB-Avail-SCnt = 0;
+        while(CB-Avail-SCnt != 60 - NB-Avail-Scnt)
+        {
+            NextBusBoarding.signal();
+        }
+        
+        numBoarded = 0;
+        CB-DeptTime = SET-CB-DeptTime();
+        NB-DeptTime = SET-NB-DeptTime();
+        NB-Avail-Scnt = 60;
+        
+        busReady = True;
+        
+    }
+    
+    // called by bus
+    procedure depart()
+    {
+        while(numBoarded != 60 - CB-Avail-SCnt)
+        {
+            AnotherBoarded.wait();
+        }
+        
+        GateEmpty = True;
+        NextBusArriving.signal();
+    }
 }
 
 ```
@@ -105,5 +157,7 @@ NYC-Route.boardBus(MyTicket)
 ## Bus
 
 ```
-
+time departure_time = NYC-Route.arrive();
+sleepUntil(departure_time);
+NYC-Route.depart();
 ```
