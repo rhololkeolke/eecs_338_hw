@@ -153,7 +153,7 @@ region TicketSales
 
 region Bus
 {
-    await(MyTicket.DeptTime == CB-DeptTime and busReady)
+    await(MyTicket.DeptTime == CB-DeptTime)
     board();
     numBoarded++;
 }
