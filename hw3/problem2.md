@@ -57,33 +57,36 @@ is applied recursively in the event of multiple signals being called before a wa
 ```
 Monitor GreyHoundStop
 {
-    TicketLine()
+    int TLineCnt;
+    condition TLine;
+    condition TAReady;
+    name CustNm = null;
+    condition TicketReady;
+    Ticket IssuedTicket;
+    int CBAvailSCnt;
+    int NBAvailSCnt;
+    time CBDeptTime;
+    time NBDeptTime;
+    int numBoarded;
+    condition nextBusBoard;
+    bool GateEmpty;
+    condition Gate;
+    bool BusReady;
+    condition cBusReady;
+    condition AllAboard;
+
+    Init
     {
-        int TLineCnt = 0;
-        condition TLine;
-        
-        condition TAReady;
-        
+        TLineCnt = 0;
         name CustNm = null;
-        condition TicketReady;
-        
-        Ticket IssuedTicket;
-        
+        Ticket IssuedTicket = null;
         int CBAvailSCnt = 60;
         int NBAvailSCnt = 60;
         time CBDeptTime = 12 AM;
         time NBDeptTime = 3 AM;
         int numBoarded = 0;
-        
-        condition nextBusBoard;
-        
         bool GateEmpty = True;
-        condition Gate;
-        
         bool BusReady = False;
-        condition cBusReady;
-
-        condition AllAboard;
     }
     
     procedure waitForCustomer()
@@ -92,7 +95,7 @@ Monitor GreyHoundStop
             TLine.wait();
     }
     
-    procedure requestTicket()
+    procedure Ticket requestTicket()
     {
         TLineCnt++;
         TLine.signal();
