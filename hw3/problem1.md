@@ -138,11 +138,9 @@ region TicketSales
 
 region Bus
 {
-    # remember the number of tickets sold
-    local numTicketsSold = 60 - CB-Avail-SCnt;
     
     # wait until everyone boards
-    await(numBoarded == numTicketsSold)
+    await(numBoarded == 60 - CB-Avail-SCnt)
     # let the next bus into the gate
     GateEmpty = True;
 }
