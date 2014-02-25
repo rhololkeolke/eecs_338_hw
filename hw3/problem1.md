@@ -128,17 +128,22 @@ while True
 region TicketSales
 {
     TLineCnt++
+}
+
+region TicketSales
+{
     await(TAReady and not SaleInProgress);
     # only allow one passenger through
     TAReady = False;
     SaleInProgress = True;
     CustNm := MyName;
+    
+    # tell the ticket agent the customer is ready
+    CReady = True;
 }
 
 region TicketSales
 {
-    # tell the ticket agent the customer is ready
-    CReady = True;
     await(ticketReady);
     ticketReady = False;
     SaleInProgress = False;
