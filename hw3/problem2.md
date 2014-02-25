@@ -52,7 +52,37 @@ there is a process blocked on that condition variable the caller blocks
 until the callee either finishes the procedure or calls wait agian. This assumption
 is applied recursively in the event of multiple signals being called before a wait or end of a procedure.
 
+The keyword `local` denotes that the variable is local to the thread it is declared in.
+
+## Assumptions
+
+I'm assuming that while the tickets must be sold on a FCFS basis, the actual order of 
+bus boarding does not matter. So the race condition that occurs in the passenger threads between the
+second TicketSales CCR and the Bus CCR does not matter. I'm assuming that passengers just care about
+whether they get a seat and not how quickly they actually get on the bus.
+
+I'm also assuming that the bus will not leave without all ticketed passengers. This is to prevent an
+issue where a passenger receives a ticket and then leaves the CPU before boarding and then the bus
+wants to depart. If the bus did not wait then the passenger would not have a valid ticket. And the passenger
+can't get on the next bus because the next bus may be oversold (and it wouldn't be FCFS then anyways).
+
+It is assumed that each passenger thread has a local variable `name MyName`.
+
+`CB-Ticket(name Name)` returns a Ticket object with the specified name as the customer name for the current bus. Automaticlly specifies the depature time and seat number. `NB-Ticket(name Name)` returns a Ticket object with the specified name as the customer name for the next bus. Automatically specifies the departure time and seat number.
+`SET-CB-DeptTime()` calculates and returns the current bus's departure time.
+`SET-NB-DeptTime()` calculates and returns the next bus's departure time.
+
 ## Shared Variables
+
+The ticket type is defined as
+```
+record Ticket
+{
+    name CustName;
+    time DeptTime;
+    int SeatNumber;
+}
+```
 
 ```
 Monitor GreyHoundStop
@@ -135,7 +165,7 @@ Monitor GreyHoundStop
     
     procedure boardBus(Ticket MyTicket)
     {
-        if(MyTicket.dept_time != CBDeptTime)
+        if(MyTicket.DeptTime != CBDeptTime)
             nextBusBoard.wait();
             
         board();
