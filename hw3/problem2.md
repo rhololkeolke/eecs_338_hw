@@ -9,6 +9,8 @@ Monitor GreyHoundStop
         condition TLine;
         bool TAReady = False;
         condition cTAReady;
+        
+        condition AllAboard;
     }
     
     procedure waitForCustomer()
@@ -63,6 +65,7 @@ Monitor GreyHoundStop
         board();
         
         numBoarded++;
+        AllAboard.signal();
     }
     
     procedure waitForGate()
@@ -98,8 +101,10 @@ Monitor GreyHoundStop
     {
         BusReady = False;
         
-        // wait for all of the passengers to board
-        // Note: May not need this in this type of solution
+        while(numBoarded != 60 - CB-Avail-SCnt)
+        {
+            AllAboard.wait();
+        }
         
         GateEmpty = True;
         Gate.signal();
