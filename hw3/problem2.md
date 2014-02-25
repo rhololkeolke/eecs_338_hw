@@ -5,63 +5,40 @@ Monitor GreyHoundStop
 {
     TicketLine()
     {
-        // initialize here
-        
-        bool SaleInProgress = False
-        
         int TLineCnt = 0;
         condition TLine;
-        
-        condition cTAReady;
         bool TAReady = False;
-        
-        condition cCReady;
-        bool CReady = False;
+        condition cTAReady;
     }
     
-    // called by TA
     procedure waitForCustomer()
     {
-        if(TLineCnt <= 0)
-        {
+        if(TLineCnt == 0)
             TLine.wait();
-        }
-        NextCustomer.signal();
     }
     
-    // called by customer
     procedure requestTicket()
     {
         TLineCnt++;
         TLine.signal();
-        
-        if(SaleInProgress)
-        {
-            NextCustomer.wait();
-        }
-        
-        SaleInProgress = True;
-        
+        TAReady.wait();
+
         CustNm = MyName;
+
+        ticketReady.wait();
         
-        if(IssuedTicket == null)
-        {
-            TicketReady.wait();
-        }
-        
-        MyTicket = IssuedTicket;
-        IssuedTicket = null;
-        SaleInProgress = False;
-        TLineCnt--
+        Ticket MyTicket = IssuedTicket;
+        TLineCnt--;
+        return MyTicket;
     }
     
-    // called by TA
     procedure printTicket()
     {
-
-        if(not busReady)
+        TAReady.signal();
+            
+        if(not BusReady)
         {
-            cBusReady.wait()
+            cBusReady.wait();
         }
         
         if(CB-Avail-SCnt != 0)
@@ -75,59 +52,57 @@ Monitor GreyHoundStop
             NB-Avail-SCnt--
         }
         
-        TicketReady.signal();
+        ticketReady.signal();
     }
     
-    // called by passengers
     procedure boardBus(Ticket MyTicket)
     {
         if(MyTicket.dept_time != CB-DeptTime)
-        {
-            NextBusBoarding.wait()
-        }
-        board()
-        boarded++;
-        AnotherBoarded.signal();
+            nextBusBoard.wait();
+            
+        board();
+        
+        numBoarded++;
     }
     
-    // called by bus
-    procedure arrive()
+    procedure waitForGate()
     {
         if(not GateEmpty)
-        {
-            NextBusArriving.wait()
-        }
-        
+            Gate.wait();
         GateEmpty = False;
-        
-        ARRIVE;
-        
-        # let all of the waiting passengers board
-        CB-Avail-SCnt = 0;
-        while(CB-Avail-SCnt != 60 - NB-Avail-Scnt)
-        {
-            NextBusBoarding.signal();
-        }
-        
+    }
+    
+    procedure pullIntoGate()
+    {
+    
         numBoarded = 0;
         CB-DeptTime = SET-CB-DeptTime();
         NB-DeptTime = SET-NB-DeptTime();
-        NB-Avail-Scnt = 60;
+    
+        // let all of the people waiting board
+        for(i = 0; i< 60 - NB-Avail-SCnt; i++)
+        {
+            nextBusBoard.signal();
+        }
+
+        CB-Avail-SCnt = 60 - NB-Avail-SCnt;
+        NB-Avail-SCnt = 60;
+    
+        BusReady = True;
+        cBusReady.signal();
         
-        busReady = True;
-        
+        return CB-DeptTime;
     }
     
-    // called by bus
-    procedure depart()
+    procedure leaveGate()
     {
-        while(numBoarded != 60 - CB-Avail-SCnt)
-        {
-            AnotherBoarded.wait();
-        }
+        BusReady = False;
+        
+        // wait for all of the passengers to board
+        // Note: May not need this in this type of solution
         
         GateEmpty = True;
-        NextBusArriving.signal();
+        Gate.signal();
     }
 }
 
@@ -143,21 +118,28 @@ GreyHoundStop NYC-Route;
 while True
 {
     NYC-Route.waitForCustomer()
-    NYC-Route.printTicket()
+    NYC-Route.printTicket();
 }
 ```
 
 ## Passenger
 
 ```
-MyTicket = NYC-Route.requestTicket()
-NYC-Route.boardBus(MyTicket)
+local Ticket MyTicket = NYC-Route.requestTicket();
+NYC-Route.boardBus(MyTicket);
 ```
 
 ## Bus
 
 ```
-time departure_time = NYC-Route.arrive();
-sleepUntil(departure_time);
-NYC-Route.depart();
+NYC-Route.waitForGate();
+ARRIVE();
+Time dept_time = NYC-Route.pullIntoGate();
+
+sleepUntil(dept_time);
+
+NYC-Route.leaveGate();
+
+DEPART();
+
 ```
