@@ -18,7 +18,7 @@ Ticket IssuedTicket = null;
 ## Ticket Agent
 
 ```
-local Ticket lIssuedTicket = null;
+local Ticket ticket = null;
 local name Name = null;
 while True
 {
@@ -50,19 +50,19 @@ while True
     {
         if(CB-Avail-SCnt != 0)
         {
-            lIssuedTicket := CB-Ticket(Name);
+            ticket := CB-Ticket(Name);
             CB-Avail-SCnt--;
         }
         else
         {
-            lIssuedTicket := NB-Ticket(Name);
+            ticket := NB-Ticket(Name);
             NB-Avail-SCnt--
         }
     }
     
     region TicketSales
     {
-        IssuedTicket = lIssuedTicket;
+        IssuedTicket = ticket;
         SaleInProgress = False;
         ticketReady = True;
         TLineCnt--;
