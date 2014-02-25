@@ -50,8 +50,7 @@ The keyword `local` denotes that the variable is local to the thread it is decla
 My Monitors use assumption one from the slides.
 That is when signal is called on a condition variable, if
 there is a process blocked on that condition variable the caller blocks
-until the callee either finishes the procedure or calls wait agian. This assumption
-is applied recursively in the event of multiple signals being called before a wait or end of a procedure.
+until the callee either finishes the procedure or calls wait agian.
 
 I'm assuming that while the tickets must be sold on a FCFS basis, the actual order of 
 bus boarding does not matter. So the race condition that occurs in the passenger threads between the
