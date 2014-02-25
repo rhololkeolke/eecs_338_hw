@@ -1,4 +1,29 @@
-# Question 2
+# Question 1
+
+## Syntax
+
+For the CCRs I'm using the following syntax
+
+```
+region <region name> 
+{
+    S1;
+    
+    await(<boolean condition>);
+    
+    S2;
+}
+```
+
+where `<region name>` is the name of the region (all regions with the same name are executed with mutual exclusion).
+`S1` is a sequetional program fragment of 0 or more lines. `await` will block and release the CCR if the `<boolean condition>` evaluates to false. Each time a process leaves its CCR either through blocking or finishing the boolean condtions for each process stuck at an await statement will be evaluated in the order they were stuck. The first true boolean condition starts executing, if there are no true statements nothing is done. After the process makes it past the `await` statement it will execute the sequention program fragement `S2` which consists of 0 or more lines. 
+
+Also as stated in the CCR definition if multiple processes are blocked waiting for the ME property they will be serviced
+in FCFS order.
+
+Notes: `await` is optional and without the region is just a CR. It still operates with ME, but will never block inside
+
+## Assumptions
 
 I'm assuming that while the tickets must be sold on a FCFS basis, the actual order of 
 bus boarding does not matter. So the race condition that occurs in the passenger threads between the
