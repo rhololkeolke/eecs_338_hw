@@ -1,5 +1,15 @@
 # Question 2
 
+I'm assuming that while the tickets must be sold on a FCFS basis, the actual order of 
+bus boarding does not matter. So the race condition that occurs in the passenger threads between the
+second TicketSales CCR and the Bus CCR does not matter. I'm assuming that passengers just care about
+whether they get a seat and not how quickly they actually get on the bus.
+
+I'm also assuming that the bus will not leave without all ticketed passengers. This is to prevent an
+issue where a passenger receives a ticket and then leaves the CPU before boarding and then the bus
+wants to depart. If the bus did not wait then the passenger would not have a valid ticket. And the passenger
+can't get on the next bus because the next bus may be oversold (and it wouldn't be FCFS then anyways).
+
 ## Shared Variables
 
 ```
