@@ -57,23 +57,33 @@ int main(int argc, char** argv)
     }
   }
 
-  pid_t agent_pid, bus_pid, customer_pid;
+  pid_t agent_pid;
+  int customerCount = 0;
+  int busCount = 0;
+
+  char countStr[100];
 
   if((int)(agent_pid = fork()) == 0) {
     execl("agent.bin", "agent", NULL);
     exit(0);
   }
-  else if((int)(bus_pid = fork()) == 0) {
-    execl("bus.bin", "bus", "0", NULL);
+  else if((int)fork() == 0) {
+    sprintf(countStr, "%d", busCount);
+    execl("bus.bin", "bus", countStr, NULL);
     exit(0);
   }
-  else if((int)(customer_pid = fork()) == 0) {
-    execl("customer.bin", "customer", "0", NULL);
+  else if((int)fork() == 0) {
+    sprintf(countStr, "%d", customerCount);
+    execl("customer.bin", "customer", countStr, NULL);
     exit(0);
   }
 
   wait(NULL);
   wait(NULL);
+
+  sleep(5);
+
+  kill(agent_pid, SIGKILL);
   wait(NULL);
 
   return 0;
