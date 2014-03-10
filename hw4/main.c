@@ -71,11 +71,18 @@ int main(int argc, char** argv)
 
   char countStr[100];
 
-  if((int)(agent_pid = fork()) == 0) {
+  // spawn the ticket agent
+  agent_pid = fork();
+  if(agent_pid == 0) {
+    // child
     execl("agent.bin", "agent", NULL);
     exit(0);
+  } else if(agent_pid < 0) {
+    perror("agent fork()");
+    exit(1);
   }
-  else if((int)fork() == 0) {
+
+  if((int)fork() == 0) {
     sprintf(countStr, "%d", busCount);
     execl("bus.bin", "bus", countStr, NULL);
     exit(0);
