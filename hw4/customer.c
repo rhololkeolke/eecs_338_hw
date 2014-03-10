@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv)
 {
-  printf("Customer started\n");
+  printf("Customer %s started\n", argv[1]);
   fflush(stdout);
 
   return 0;

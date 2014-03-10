@@ -3,8 +3,12 @@
 
 #include <stdio.h>
 #include <sys/sem.h>
+#include <sys/ipc.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <stdlib.h>
 
-void wait(int semid, int semaphore)
+void semwait(int semid, int semaphore)
 {
   struct sembuf psembuf;
   
@@ -15,7 +19,7 @@ void wait(int semid, int semaphore)
   return;
 }
 
-void signal(int semid, int semaphore)
+void semsignal(int semid, int semaphore)
 {
   struct sembuf vsembuf;
   
