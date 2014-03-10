@@ -8,6 +8,7 @@ void print_usage()
   printf("--totb (-B): Total number of B threads for the run (defaults to 3)\n");
   printf("--numc (-c): Number of C threads to spawn each spawn time (defaults to 6)\n");
   printf("--numb (-b): Number of B theads to spawn each spawn time (defaults to 1)\n");
+  printf("--seed (-s): Seed for random number generator (defaults to current time)\n");
   printf("\n");
 }
 
@@ -17,13 +18,16 @@ int main(int argc, char** argv)
     {"totc", required_argument, 0, 'C'}, // total number of C threads for the run
     {"totb", required_argument, 0, 'B'}, // total number of B threads for the run
     {"numc", required_argument, 0, 'c'}, // number of C threads to spawn each time
-    {"numb", required_argument, 0, 'b'}  // number of B threads to spawn each time
+    {"numb", required_argument, 0, 'b'}, // number of B threads to spawn each time
+    {"seed", required_argument, 0, 's'} // seed of rand (defaults to current time value) 
   };
 
   int totc = 18;
   int totb = 3;
   int numc = 6;
   int numb = 1;
+
+  srand(time(NULL));
 
   printf("\n");
   printf("EECS 338 HW4\n");
@@ -33,7 +37,7 @@ int main(int argc, char** argv)
 
   int long_index = 0;
   char opt;
-  while((opt = getopt_long(argc, argv, "C:B:c:b:", long_options, &long_index)) != -1) {
+  while((opt = getopt_long(argc, argv, "C:B:c:b:s:", long_options, &long_index)) != -1) {
     switch(opt) {
     case 'c':
       numc = atoi(optarg);
@@ -50,6 +54,10 @@ int main(int argc, char** argv)
     case 'B':
       totb = atoi(optarg);
       printf("B: %d\n", totb);
+      break;
+    case 's':
+      srand(atoi(optarg));
+      printf("s: %d\n", atoi(optarg));
       break;
     default:
       print_usage();

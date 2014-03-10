@@ -7,6 +7,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <time.h>
 
 void semwait(int semid, int semaphore)
 {
