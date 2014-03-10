@@ -6,7 +6,7 @@ void print_usage()
   printf("\n");
   printf("--totc (-C): Total number of C threads for the run (defaults to 18)\n");
   printf("--totb (-B): Total number of B threads for the run (defaults to 3)\n");
-  printf("--numc (-c): Number of C threads to spawn each spawn time (defaults to 5)\n");
+  printf("--numc (-c): Number of C threads to spawn each spawn time (defaults to 6)\n");
   printf("--numb (-b): Number of B theads to spawn each spawn time (defaults to 1)\n");
   printf("\n");
 }
@@ -20,6 +20,11 @@ int main(int argc, char** argv)
     {"numb", required_argument, 0, 'b'}  // number of B threads to spawn each time
   };
 
+  int totc = 18;
+  int totb = 3;
+  int numc = 6;
+  int numb = 1;
+
   printf("\n");
   printf("EECS 338 HW4\n");
   printf("Devin Schwab (dts34)\n");
@@ -31,16 +36,20 @@ int main(int argc, char** argv)
   while((opt = getopt_long(argc, argv, "C:B:c:b:", long_options, &long_index)) != -1) {
     switch(opt) {
     case 'c':
-      printf("c: %d\n", atoi(optarg));
+      numc = atoi(optarg);
+      printf("c: %d\n", numc);
       break;
     case 'b':
-      printf("b: %d\n", atoi(optarg));
+      numb = atoi(optarg);
+      printf("b: %d\n", numb);
       break;
     case 'C':
-      printf("C: %d\n", atoi(optarg));
+      totc = atoi(optarg);
+      printf("C: %d\n", totc);
       break;
     case 'B':
-      printf("B: %d\n", atoi(optarg));
+      totb = atoi(optarg);
+      printf("B: %d\n", totb);
       break;
     default:
       print_usage();
