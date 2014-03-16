@@ -29,11 +29,10 @@ int main(int argc, char** argv)
   ticket = shared->ticket;
   printf("Customer %s's ticket info:\n", argv[1]);
   printf("\tName: %s\n", ticket.TicketHolder);
-  printf("\tTime: TODO\n");
+  printf("\tTime: %s\n", ctime(&ticket.Dept_Time));
   printf("\tSeat: %d\n", ticket.SeatNo);
 
-  // TODO: add time check
-  if(0) {
+  if(ticket.Dept_Time == shared->NB_DeptTime) {
     shared->NB_WtCnt++;
     semsignal(semid, SEM_MUTEX);
     semwait(semid, SEM_NBUS);

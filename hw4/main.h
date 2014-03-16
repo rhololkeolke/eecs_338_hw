@@ -26,6 +26,7 @@
 #define SHMKEY 77
 
 #define BUS_CAPACITY 7
+#define BUS_PERIOD 180 // seconds
 
 void semwait(int semid, int semaphore)
 {
@@ -50,7 +51,7 @@ void semsignal(int semid, int semaphore)
 
 struct Ticket {
   char TicketHolder[100];
-  // TODO: Time
+  time_t Dept_Time;
   int SeatNo;
 };
 
@@ -59,7 +60,8 @@ struct Common {
   int CB_Avail_SCnt;
   int NB_Avail_SCnt;
   char CName[100];
-  // TODO: Time
+  time_t CB_DeptTime;
+  time_t NB_DeptTime;
   struct Ticket ticket;
 };
 

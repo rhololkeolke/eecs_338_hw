@@ -48,6 +48,8 @@ int main(int argc, char** argv)
   shared->NB_WtCnt = 0;
   shared->CB_Avail_SCnt = BUS_CAPACITY;
   shared->NB_Avail_SCnt = BUS_CAPACITY;
+  shared->CB_DeptTime = time(NULL) + BUS_PERIOD;
+  shared->NB_DeptTime = shared->CB_DeptTime + BUS_PERIOD;
   shared->ticket.SeatNo = 0;
 
   srand(time(NULL));
