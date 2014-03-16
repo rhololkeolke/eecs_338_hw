@@ -39,6 +39,7 @@ int main(int argc, char** argv)
   seminit[SEM_AGENTWRK]=0;
   seminit[SEM_GETTCKT]=0;
   seminit[SEM_NBUS]=0;
+  seminit[SEM_GATEEMPTY]=1;
   semctlarg.array = seminit;
   semctl(semid, NUM_SEMS, SETALL, semctlarg);
 
@@ -114,6 +115,22 @@ int main(int argc, char** argv)
     fflush(stdout);
     sleep(sleep_time);
 
+    if(busCount < totb) { // more to spawn
+      int i;
+      for(i=0; i<numb && busCount < totb; i++) {
+	busCount++;
+	pid_t b_pid;
+	if((int)(b_pid = fork()) == 0) {
+	  sprintf(countStr, "%d", busCount);
+	  execl("bus.bin", "bus", countStr, NULL);
+	  exit(0);
+	} else if(b_pid < 0) {
+	  perror("bus fork()");
+	  exit(1); // should probably cleanup before exiting
+	}
+      }
+    }
+
     if(customerCount < totc) { // more to spawn
       int i;
       for(i=0; i<numc && customerCount < totc; i++) {
@@ -131,21 +148,6 @@ int main(int argc, char** argv)
       }
     }
 
-    if(busCount < totb) { // more to spawn
-      int i;
-      for(i=0; i<numb && busCount < totb; i++) {
-	busCount++;
-	pid_t b_pid;
-	if((int)(b_pid = fork()) == 0) {
-	  sprintf(countStr, "%d", busCount);
-	  execl("bus.bin", "bus", countStr, NULL);
-	  exit(0);
-	} else if(b_pid < 0) {
-	  perror("bus fork()");
-	  exit(1); // should probably cleanup before exiting
-	}
-      }
-    }
   }
 
   int i;

@@ -15,18 +15,19 @@
 #include <time.h>
 #include <string.h>
 
-#define NUM_SEMS 5
+#define NUM_SEMS 6
 #define SEM_MUTEX 0
 #define SEM_TLINE 1
 #define SEM_AGENTWRK 2
 #define SEM_GETTCKT 3
 #define SEM_NBUS 4
+#define SEM_GATEEMPTY 5
 
 #define SEMKEY 77
 #define SHMKEY 77
 
 #define BUS_CAPACITY 7
-#define BUS_PERIOD 180 // seconds
+#define BUS_PERIOD 30 // seconds
 
 void semwait(int semid, int semaphore)
 {
