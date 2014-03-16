@@ -25,6 +25,8 @@
 #define SEMKEY 77
 #define SHMKEY 77
 
+#define BUS_CAPACITY 7
+
 void semwait(int semid, int semaphore)
 {
   struct sembuf psembuf;

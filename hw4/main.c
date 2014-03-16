@@ -46,8 +46,8 @@ int main(int argc, char** argv)
   shmid = shmget(SHMKEY, sizeof(struct Common), 0777 | IPC_CREAT);
   shared=(struct Common *)shmat(shmid, 0, 0);
   shared->NB_WtCnt = 0;
-  shared->CB_Avail_SCnt = 60;
-  shared->NB_Avail_SCnt = 60;
+  shared->CB_Avail_SCnt = BUS_CAPACITY;
+  shared->NB_Avail_SCnt = BUS_CAPACITY;
   shared->ticket.SeatNo = 0;
 
   srand(time(NULL));
@@ -114,7 +114,7 @@ int main(int argc, char** argv)
 
     if(customerCount < totc) { // more to spawn
       int i;
-      for(i=0; i<numc; i++) {
+      for(i=0; i<numc && customerCount < totc; i++) {
 	customerCount++;
 	pid_t c_pid;
 	if((int)(c_pid = fork()) == 0) {
@@ -131,7 +131,7 @@ int main(int argc, char** argv)
 
     if(busCount < totb) { // more to spawn
       int i;
-      for(i=0; i<numb; i++) {
+      for(i=0; i<numb && busCount < totb; i++) {
 	busCount++;
 	pid_t b_pid;
 	if((int)(b_pid = fork()) == 0) {

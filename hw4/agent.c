@@ -20,12 +20,12 @@ int main(int argc, char** argv)
     if(shared->CB_Avail_SCnt != 0) {
       strcpy(shared->ticket.TicketHolder, shared->CName);
       // TODO: set ticket time
-      shared->ticket.SeatNo = 60 - shared->CB_Avail_SCnt;
+      shared->ticket.SeatNo = BUS_CAPACITY - shared->CB_Avail_SCnt;
       shared->CB_Avail_SCnt--;
     } else {
       strcpy(shared->ticket.TicketHolder, shared->CName);
       // TODO: set ticket time
-      shared->ticket.SeatNo = 60 - shared->NB_Avail_SCnt;
+      shared->ticket.SeatNo = BUS_CAPACITY - shared->NB_Avail_SCnt;
       shared->NB_Avail_SCnt--;
     }
     semsignal(semid, SEM_GETTCKT);
