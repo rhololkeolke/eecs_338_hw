@@ -48,10 +48,6 @@ int main(int argc, char** argv)
   shared->NB_WtCnt = 0;
   shared->CB_Avail_SCnt = 60;
   shared->NB_Avail_SCnt = 60;
-  shared->CName = NULL;
-  shared->CNameSize = 0;
-  shared->ticket.TicketHolder = NULL;
-  shared->ticket.TicketHolderSize = 0;
   shared->ticket.SeatNo = 0;
 
   srand(time(NULL));

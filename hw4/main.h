@@ -13,6 +13,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 #define NUM_SEMS 5
 #define SEM_MUTEX 0
@@ -46,8 +47,7 @@ void semsignal(int semid, int semaphore)
 }
 
 struct Ticket {
-  char* TicketHolder;
-  int TicketHolderSize;
+  char TicketHolder[100];
   // TODO: Time
   int SeatNo;
 };
@@ -56,8 +56,7 @@ struct Common {
   int NB_WtCnt;
   int CB_Avail_SCnt;
   int NB_Avail_SCnt;
-  char* CName;
-  int CNameSize;
+  char CName[100];
   // TODO: Time
   struct Ticket ticket;
 };
