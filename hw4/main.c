@@ -123,11 +123,18 @@ int main(int argc, char** argv)
     }
   }
 
-  wait(NULL);
-  wait(NULL);
+  
 
+  int i;
+  for(i=0; i < totc + totb; i++) {
+    printf("Calling wait %d\n", i);
+    wait(NULL);
+  }
+
+  printf("Sleeping for 5 seconds\n");
   sleep(5);
 
+  printf("Killing ticket agent\n");
   kill(agent_pid, SIGKILL);
   wait(NULL);
 
