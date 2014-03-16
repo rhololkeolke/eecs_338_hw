@@ -27,6 +27,33 @@ int main(int argc, char** argv)
   int numc = 6;
   int numb = 1;
 
+  int semid, shmid;
+  unsigned short seminit[NUM_SEMS];
+  struct Common* shared;
+  union semun semctlarg;
+
+  // initialize the semaphores
+  semid = semget(SEMKEY, NUM_SEMS, 0777 | IPC_CREAT);
+  seminit[SEM_MUTEX]=1;
+  seminit[SEM_TLINE]=1;
+  seminit[SEM_AGENTWRK]=0;
+  seminit[SEM_GETTCKT]=0;
+  seminit[SEM_NBUS]=0;
+  semctlarg.array = seminit;
+  semctl(semid, NUM_SEMS, SETALL, semctlarg);
+
+  // initiailize the shared memory
+  shmid = shmget(SHMKEY, sizeof(struct Common), 0777 | IPC_CREAT);
+  shared=(struct Common *)shmat(shmid, 0, 0);
+  shared->NB_WtCnt = 0;
+  shared->CB_Avail_SCnt = 60;
+  shared->NB_Avail_SCnt = 60;
+  shared->CName = NULL;
+  shared->CNameSize = 0;
+  shared->ticket.TicketHolder = NULL;
+  shared->ticket.TicketHolderSize = 0;
+  shared->ticket.SeatNo = 0;
+
   srand(time(NULL));
 
   printf("\n");
@@ -123,8 +150,6 @@ int main(int argc, char** argv)
     }
   }
 
-  
-
   int i;
   for(i=0; i < totc + totb; i++) {
     printf("Calling wait %d\n", i);
@@ -137,6 +162,10 @@ int main(int argc, char** argv)
   printf("Killing ticket agent\n");
   kill(agent_pid, SIGKILL);
   wait(NULL);
+
+  printf("Cleaning up semaphores and shared memory\n");
+  semctl(semid, NUM_SEMS, IPC_RMID, 0);
+  shmctl(shmid, IPC_RMID, 0);
 
   return 0;
 }
