@@ -15,23 +15,29 @@ int main(int argc, char** argv)
   // loop until killed
   while(1)
   {
-    printf("waiting for more work\n");
-    semwait(semid, SEM_AGENTWRK);
-    if(shared->CB_Avail_SCnt != 0) {
-      printf("Assigning a ticket to the current bus\n");
-      strcpy(shared->ticket.TicketHolder, shared->CName);
-      shared->ticket.Dept_Time = shared->CB_DeptTime;
-      shared->ticket.SeatNo = BUS_CAPACITY - shared->CB_Avail_SCnt;
-      shared->CB_Avail_SCnt--;
-    } else {
-      printf("Assigning a ticket to the next bus\n");
-      strcpy(shared->ticket.TicketHolder, shared->CName);
-      shared->ticket.Dept_Time = shared->NB_DeptTime;
-      shared->ticket.SeatNo = BUS_CAPACITY - shared->NB_Avail_SCnt;
-      shared->NB_Avail_SCnt--;
-    }
-    semsignal(semid, SEM_GETTCKT);
-    semsignal(semid, SEM_TLINE);
+    printf("[agent] waiting for more work\n");
+	fflush(stdout);
+
+	semwait(semid, SEM_TICKET_QUEUE);
+	semwait(semid, SEM_MUTEX);
+	if(shared->tickets_sold >= BUS_CAPACITY)
+	{
+		printf("[agent] Assigning a ticket to the next bus\n");
+		fflush(stdout);
+		shared->ticket.dept_time = shared->departure_time + BUS_PERIOD;
+		shared->ticket.seat_no = ++shared->next_bus_tickets;
+	}
+	else
+	{
+		printf("[agent] Assigning a ticket to the current bus\n");
+		fflush(stdout);
+		shared->ticket.dept_time = shared->departure_time;
+		shared->ticket.seat_no = ++shared->tickets_sold;
+	}
+
+	semsignal(semid, SEM_TICKET_READY);
+	semwait(semid, SEM_TICKET_RECEIVED);
+	semsignal(semid, SEM_MUTEX);
   }
 
   return 0;

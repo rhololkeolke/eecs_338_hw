@@ -34,24 +34,26 @@ int main(int argc, char** argv)
 
   // initialize the semaphores
   semid = semget(SEMKEY, NUM_SEMS, 0777 | IPC_CREAT);
-  seminit[SEM_MUTEX]=1;
-  seminit[SEM_TLINE]=1;
-  seminit[SEM_AGENTWRK]=0;
-  seminit[SEM_GETTCKT]=0;
-  seminit[SEM_NBUS]=0;
-  seminit[SEM_GATEEMPTY]=1;
+  seminit[SEM_TICKET_QUEUE] = 0;
+  seminit[SEM_TICKET_READY] = 0;
+  seminit[SEM_TICKET_RECEIVED] = 0;
+  seminit[SEM_MUTEX] = 1;
+  seminit[SEM_NEXT_BUS_QUEUE] = 0;
+  seminit[SEM_BUS_BOARDABLE] = 0;
+  seminit[SEM_GATE_EMPTY] = 1;
+  seminit[SEM_CAN_BOARD] = 1;
   semctlarg.array = seminit;
   semctl(semid, NUM_SEMS, SETALL, semctlarg);
 
   // initiailize the shared memory
   shmid = shmget(SHMKEY, sizeof(struct Common), 0777 | IPC_CREAT);
   shared=(struct Common *)shmat(shmid, 0, 0);
-  shared->NB_WtCnt = 0;
-  shared->CB_Avail_SCnt = BUS_CAPACITY;
-  shared->NB_Avail_SCnt = BUS_CAPACITY;
-  shared->CB_DeptTime = time(NULL) + BUS_PERIOD;
-  shared->NB_DeptTime = shared->CB_DeptTime + BUS_PERIOD;
-  shared->ticket.SeatNo = 0;
+  shared->departure_time = time(NULL) + BUS_PERIOD;
+  shared->tickets_sold = 0;
+  shared->next_bus_tickets = 0;
+  shared->ticket.dept_time = shared->departure_time;
+  shared->ticket.seat_no = 0;
+  shared->boarded = 0;
 
   srand(time(NULL));
 

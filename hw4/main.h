@@ -15,13 +15,16 @@
 #include <time.h>
 #include <string.h>
 
-#define NUM_SEMS 6
-#define SEM_MUTEX 0
-#define SEM_TLINE 1
-#define SEM_AGENTWRK 2
-#define SEM_GETTCKT 3
-#define SEM_NBUS 4
-#define SEM_GATEEMPTY 5
+#define NUM_SEMS 8
+#define SEM_TICKET_QUEUE 0
+#define SEM_TICKET_READY 1
+#define SEM_TICKET_RECEIVED 2
+#define SEM_MUTEX 3
+#define SEM_NEXT_BUS_QUEUE 4
+#define SEM_BUS_BOARDABLE 5
+#define SEM_GATE_EMPTY 6
+#define SEM_CAN_BOARD 7
+
 
 #define SEMKEY 77
 #define SHMKEY 77
@@ -51,19 +54,17 @@ void semsignal(int semid, int semaphore)
 }
 
 struct Ticket {
-  char TicketHolder[100];
-  time_t Dept_Time;
-  int SeatNo;
+  char ticket_holder[100];
+  time_t dept_time;
+  int seat_no;
 };
 
 struct Common {
-  int NB_WtCnt;
-  int CB_Avail_SCnt;
-  int NB_Avail_SCnt;
-  char CName[100];
-  time_t CB_DeptTime;
-  time_t NB_DeptTime;
-  struct Ticket ticket;
+	time_t departure_time;
+	int tickets_sold;
+	int next_bus_tickets;
+	int boarded;
+	struct Ticket ticket;
 };
 
 union semun {

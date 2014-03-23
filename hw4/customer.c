@@ -10,36 +10,47 @@ int main(int argc, char** argv)
   int semid, shmid;
   struct Common* shared;
 
-  struct Ticket ticket;
-
   semid = semget(SEMKEY, NUM_SEMS, 0777);
   shmid = shmget(SHMKEY, 0, 0);
   shared = (struct Common *)shmat(shmid, 0, 0);
 
   printf("Customer %s has arrived\n", argv[1]);
+  fflush(stdout);
 
-  semwait(semid, SEM_TLINE);
-  semwait(semid, SEM_MUTEX);
-  strcpy(shared->CName, argv[1]);
-  semsignal(semid, SEM_AGENTWRK);
-  semwait(semid, SEM_GETTCKT);
-  
-  // get ticket
-  printf("Customer %s getting ticket\n", argv[1]);
-  ticket = shared->ticket;
+  semsignal(semid, SEM_TICKET_QUEUE);
+  semwait(semid, SEM_TICKET_READY);
+
+  printf("Cusomter %s getting ticket\n", argv[1]);
+  struct Ticket ticket = shared->ticket;
+  strcpy(ticket.ticket_holder, argv[1]);
   printf("Customer %s's ticket info:\n", argv[1]);
-  printf("\tName: %s\n", ticket.TicketHolder);
-  printf("\tTime: %s\n", ctime(&ticket.Dept_Time));
-  printf("\tSeat: %d\n", ticket.SeatNo);
+  printf("\tName: %s\n", ticket.ticket_holder);
+  printf("\tTime: %s", ctime(&ticket.dept_time));
+  printf("\tSeat: %d\n", ticket.seat_no);
+  fflush(stdout);
 
-  if(ticket.Dept_Time == shared->NB_DeptTime) {
-    shared->NB_WtCnt++;
-    semsignal(semid, SEM_MUTEX);
-    semwait(semid, SEM_NBUS);
-  } else {
-    semsignal(semid, SEM_MUTEX);
+  // is this ticket for the current or the next bus?
+  char curr_bus_ticket = ticket.dept_time == shared->departure_time ? 1 : 0;
+
+  semsignal(semid, SEM_TICKET_RECEIVED);
+  if(curr_bus_ticket == 0)
+  {
+	  printf("Customer %s waiting for next bus\n", argv[1]);
+	  semwait(semid, SEM_NEXT_BUS_QUEUE);
   }
 
-  printf("Customer %s boarding bus\n", argv[1]);
+  // passengers may block here if they are released
+  // from the next bus queue but the next bus
+  // hasn't finished pulling up to the gate to allow boarders
+  semwait(semid, SEM_BUS_BOARDABLE);
+  semsignal(semid, SEM_BUS_BOARDABLE);
+
+  // serializes the boarding of passengers, but doesn't enforce FCFS boarding
+  semwait(semid, SEM_CAN_BOARD);
+  printf("Customer %s is boarding bus\n", argv[1]);
+  fflush(stdout);
+  shared->boarded++;
+  semsignal(semid, SEM_CAN_BOARD);
+
   return 0;
 }
