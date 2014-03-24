@@ -4,10 +4,10 @@
 void print_usage()
 {
   printf("\n");
-  printf("--totc (-C): Total number of C threads for the run (defaults to 18)\n");
-  printf("--totb (-B): Total number of B threads for the run (defaults to 3)\n");
-  printf("--numc (-c): Number of C threads to spawn each spawn time (defaults to 6)\n");
-  printf("--numb (-b): Number of B theads to spawn each spawn time (defaults to 1)\n");
+  printf("--totc (-C): Total number of C processes for the run (defaults to 18)\n");
+  printf("--totb (-B): Total number of B processes for the run (defaults to 3)\n");
+  printf("--numc (-c): Number of C processes to spawn each spawn time (defaults to 6)\n");
+  printf("--numb (-b): Number of B processes to spawn each spawn time (defaults to 1)\n");
   printf("--seed (-s): Seed for random number generator (defaults to current time)\n");
   printf("\n");
 }
@@ -15,10 +15,10 @@ void print_usage()
 int main(int argc, char** argv)
 {
   static struct option long_options[] = {
-    {"totc", required_argument, 0, 'C'}, // total number of C threads for the run
-    {"totb", required_argument, 0, 'B'}, // total number of B threads for the run
-    {"numc", required_argument, 0, 'c'}, // number of C threads to spawn each time
-    {"numb", required_argument, 0, 'b'}, // number of B threads to spawn each time
+    {"totc", required_argument, 0, 'C'}, // total number of C processes for the run
+    {"totb", required_argument, 0, 'B'}, // total number of B processes for the run
+    {"numc", required_argument, 0, 'c'}, // number of C processes to spawn each time
+    {"numb", required_argument, 0, 'b'}, // number of B processes to spawn each time
     {"seed", required_argument, 0, 's'} // seed of rand (defaults to current time value) 
   };
 
@@ -119,7 +119,7 @@ int main(int argc, char** argv)
     exit(1);
   }
 
-  // loop until all of the customer and bus threads have spawned
+  // loop until all of the customer and bus processes have spawned
   while(customerCount < totc || busCount < totb) {
     int sleep_time = rand() % 6; // sleep at most 60 seconds before spawning more processes
     printf("sleeping for %d\n", sleep_time);
