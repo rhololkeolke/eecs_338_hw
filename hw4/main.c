@@ -118,38 +118,36 @@ int main(int argc, char** argv)
     sleep(sleep_time);
 
     if(busCount < totb) { // more to spawn
-      int i;
-      for(i=0; i<numb && busCount < totb; i++) {
-	busCount++;
-	pid_t b_pid;
-	if((int)(b_pid = fork()) == 0) {
-	  sprintf(countStr, "%d", busCount);
-	  execl("bus.bin", "bus", countStr, NULL);
-	  exit(0);
-	} else if(b_pid < 0) {
-	  perror("bus fork()");
-	  exit(1); // should probably cleanup before exiting
-	}
-      }
+		int i;
+		for(i=0; i<numb && busCount < totb; i++) {
+			busCount++;
+			pid_t b_pid;
+			if((int)(b_pid = fork()) == 0) {
+				sprintf(countStr, "%d", busCount);
+				execl("bus.bin", "bus", countStr, NULL);
+				exit(0);
+			} else if(b_pid < 0) {
+				perror("bus fork()");
+				exit(1); // should probably cleanup before exiting
+			}
+		}
     }
 
     if(customerCount < totc) { // more to spawn
       int i;
       for(i=0; i<numc && customerCount < totc; i++) {
-	customerCount++;
-	pid_t c_pid;
-	if((int)(c_pid = fork()) == 0) {
-	  sprintf(countStr, "%d", customerCount);
-	  execl("customer.bin", "customer", countStr, NULL);
-	  exit(0);
-	} else if(c_pid < 0) {
-	  perror("customer fork()");
-	  exit(1); // should probably cleanup before exiting
-	}
-	
+		  customerCount++;
+		  pid_t c_pid;
+		  if((int)(c_pid = fork()) == 0) {
+			  sprintf(countStr, "%d", customerCount);
+			  execl("customer.bin", "customer", countStr, NULL);
+			  exit(0);
+		  } else if(c_pid < 0) {
+			  perror("customer fork()");
+			  exit(1); // should probably cleanup before exiting
+		  }
       }
     }
-
   }
 
   int i;
