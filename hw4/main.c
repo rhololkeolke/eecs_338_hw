@@ -27,34 +27,6 @@ int main(int argc, char** argv)
   int numc = 6;
   int numb = 1;
 
-  int semid, shmid;
-  unsigned short seminit[NUM_SEMS];
-  struct Common* shared;
-  union semun semctlarg;
-
-  // initialize the semaphores
-  semid = semget(SEMKEY, NUM_SEMS, 0777 | IPC_CREAT);
-  seminit[SEM_TICKET_QUEUE] = 0;
-  seminit[SEM_TICKET_READY] = 0;
-  seminit[SEM_TICKET_RECEIVED] = 0;
-  seminit[SEM_MUTEX] = 1;
-  seminit[SEM_NEXT_BUS_QUEUE] = 0;
-  seminit[SEM_BUS_BOARDABLE] = 0;
-  seminit[SEM_GATE_EMPTY] = 1;
-  seminit[SEM_CAN_BOARD] = 1;
-  semctlarg.array = seminit;
-  semctl(semid, NUM_SEMS, SETALL, semctlarg);
-
-  // initiailize the shared memory
-  shmid = shmget(SHMKEY, sizeof(struct Common), 0777 | IPC_CREAT);
-  shared=(struct Common *)shmat(shmid, 0, 0);
-  shared->departure_time = time(NULL) + BUS_PERIOD;
-  shared->tickets_sold = 0;
-  shared->next_bus_tickets = 0;
-  shared->ticket.dept_time = shared->departure_time;
-  shared->ticket.seat_no = 0;
-  shared->boarded = 0;
-
   srand(time(NULL));
 
   printf("\n");
@@ -65,7 +37,7 @@ int main(int argc, char** argv)
 
   int long_index = 0;
   char opt;
-  while((opt = getopt_long(argc, argv, "C:B:c:b:s:", long_options, &long_index)) != -1) {
+  while((opt = getopt_long(argc, argv, "C:B:c:b:s:h", long_options, &long_index)) != -1) {
     switch(opt) {
     case 'c':
       numc = atoi(optarg);
@@ -87,11 +59,48 @@ int main(int argc, char** argv)
       srand(atoi(optarg));
       printf("s: %d\n", atoi(optarg));
       break;
+	case 'h':
     default:
       print_usage();
       exit(1);
     }
   }
+
+  if(totc > totb*BUS_CAPACITY)
+  {
+	  fprintf(stderr, "Error: Number of customers specified is greater than can fit on buses (%d > %d)\n",
+			  totc, totb*BUS_CAPACITY);
+	  exit(1);
+  }
+
+  int semid, shmid;
+  unsigned short seminit[NUM_SEMS];
+  struct Common* shared;
+  union semun semctlarg;
+
+  // initialize the semaphores
+  semid = semget(SEMKEY, NUM_SEMS, 0777 | IPC_CREAT);
+  seminit[SEM_TICKET_QUEUE] = 0;
+  seminit[SEM_TICKET_READY] = 0;
+  seminit[SEM_TICKET_RECEIVED] = 0;
+  seminit[SEM_MUTEX] = 1;
+  seminit[SEM_NEXT_BUS_QUEUE] = 0;
+  seminit[SEM_BUS_BOARDABLE] = 0;
+  seminit[SEM_GATE_EMPTY] = 1;
+  seminit[SEM_CAN_BOARD] = 1;
+  seminit[SEM_MAX_CUSTOMERS] = 14;
+  semctlarg.array = seminit;
+  semctl(semid, NUM_SEMS, SETALL, semctlarg);
+
+  // initiailize the shared memory
+  shmid = shmget(SHMKEY, sizeof(struct Common), 0777 | IPC_CREAT);
+  shared=(struct Common *)shmat(shmid, 0, 0);
+  shared->departure_time = time(NULL) + BUS_PERIOD;
+  shared->tickets_sold = 0;
+  shared->next_bus_tickets = 0;
+  shared->ticket.dept_time = shared->departure_time;
+  shared->ticket.seat_no = 0;
+  shared->boarded = 0;
 
   pid_t agent_pid;
   int customerCount = 0;
@@ -155,9 +164,6 @@ int main(int argc, char** argv)
     printf("Calling wait %d\n", i);
     wait(NULL);
   }
-
-  printf("Sleeping for 5 seconds\n");
-  sleep(5);
 
   printf("Killing ticket agent\n");
   kill(agent_pid, SIGKILL);

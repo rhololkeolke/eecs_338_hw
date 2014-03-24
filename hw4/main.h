@@ -15,7 +15,7 @@
 #include <time.h>
 #include <string.h>
 
-#define NUM_SEMS 8
+#define NUM_SEMS 9
 #define SEM_TICKET_QUEUE 0
 #define SEM_TICKET_READY 1
 #define SEM_TICKET_RECEIVED 2
@@ -24,7 +24,7 @@
 #define SEM_BUS_BOARDABLE 5
 #define SEM_GATE_EMPTY 6
 #define SEM_CAN_BOARD 7
-
+#define SEM_MAX_CUSTOMERS 8
 
 #define SEMKEY 77
 #define SHMKEY 77

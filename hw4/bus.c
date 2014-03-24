@@ -57,6 +57,12 @@ int main(int argc, char** argv)
   // reset the ticket variables for the next bus
   printf("Bus %s preparing shared variables for next bus\n", argv[1]);
   fflush(stdout);
+  // if there were customers waiting for the next, next bus or beyond
+  // release some of them
+  for(i=0; i<shared->tickets_sold; i++)
+  {
+	  semsignal(semid, SEM_MAX_CUSTOMERS);
+  }
   shared->tickets_sold = shared->next_bus_tickets;
   shared->next_bus_tickets = 0;
   shared->departure_time += BUS_PERIOD;

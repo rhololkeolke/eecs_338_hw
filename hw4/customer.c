@@ -14,6 +14,9 @@ int main(int argc, char** argv)
   shmid = shmget(SHMKEY, 0, 0);
   shared = (struct Common *)shmat(shmid, 0, 0);
 
+  // enforce the assumption that more customers than can fit on the current
+  // plus the next bus is never exceeded
+  semwait(semid, SEM_MAX_CUSTOMERS);
   printf("Customer %s has arrived\n", argv[1]);
   fflush(stdout);
 
