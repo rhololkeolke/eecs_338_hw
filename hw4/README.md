@@ -1,8 +1,8 @@
 # EECS 338 HW 4
 
-Devin Schwab
-dts34
-3/23/14
+Devin Schwab  
+dts34  
+3/23/14  
 
 ## Building
 
