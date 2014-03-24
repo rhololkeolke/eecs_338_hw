@@ -8,8 +8,8 @@ int main(int argc, char** argv)
   int semid, shmid;
   struct Common *shared;
 
-  semid = semget(SEMKEY, NUM_SEMS, 0777);
-  shmid = shmget(SHMKEY, 0, 0);
+  semid = semget(getSemKey(), NUM_SEMS, 0777);
+  shmid = shmget(getSemKey(), 0, 0);
   shared = (struct Common *)shmat(shmid, 0, 0);
 
   // loop until killed

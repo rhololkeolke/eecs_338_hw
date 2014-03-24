@@ -26,8 +26,8 @@
 #define SEM_CAN_BOARD 7
 #define SEM_MAX_CUSTOMERS 8
 
-#define SEMKEY 77
-#define SHMKEY 77
+#define SEMKEY 6491
+#define SHMKEY 6491
 
 #define BUS_CAPACITY 7
 #define BUS_PERIOD 30 // seconds
@@ -51,6 +51,25 @@ void semsignal(int semid, int semaphore)
   vsembuf.sem_flg = 0;
   vsembuf.sem_num = semaphore;
   semop(semid, &vsembuf, 1);
+}
+
+key_t getSemKey()
+{
+	FILE *fp;
+	char path[1024];
+
+	fp = popen("/bin/pwd", "r");
+	if (fp == NULL)
+	{
+		perror("Executing pwd");
+		exit(1);
+	}
+
+	while (fgets(path, sizeof(path)-1, fp) != NULL) {}
+
+	pclose(fp);
+
+	return ftok(path, SEMKEY);
 }
 
 struct Ticket {

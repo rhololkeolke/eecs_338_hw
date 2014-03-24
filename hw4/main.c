@@ -79,7 +79,7 @@ int main(int argc, char** argv)
   union semun semctlarg;
 
   // initialize the semaphores
-  semid = semget(SEMKEY, NUM_SEMS, 0777 | IPC_CREAT);
+  semid = semget(getSemKey(), NUM_SEMS, 0777 | IPC_CREAT);
   seminit[SEM_TICKET_QUEUE] = 0;
   seminit[SEM_TICKET_READY] = 0;
   seminit[SEM_TICKET_RECEIVED] = 0;
@@ -93,7 +93,7 @@ int main(int argc, char** argv)
   semctl(semid, NUM_SEMS, SETALL, semctlarg);
 
   // initiailize the shared memory
-  shmid = shmget(SHMKEY, sizeof(struct Common), 0777 | IPC_CREAT);
+  shmid = shmget(getSemKey(), sizeof(struct Common), 0777 | IPC_CREAT);
   shared=(struct Common *)shmat(shmid, 0, 0);
   shared->departure_time = time(NULL) + BUS_PERIOD;
   shared->tickets_sold = 0;
