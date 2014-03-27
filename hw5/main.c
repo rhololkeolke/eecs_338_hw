@@ -1,4 +1,9 @@
-#include "main.h"
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <semaphore.h>
+#include <getopt.h>
 
 sem_t o_sem, h_sem;
 pthread_mutex_t mutex, b_mutex;
