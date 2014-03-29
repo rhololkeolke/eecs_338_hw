@@ -1,0 +1,169 @@
+
+EECS 338 HW5
+Devin Schwab (dts34)
+----------------------
+1396052498.827454 main[0]: spawning more threads
+1396052498.827644 hydrogen[0]: waiting for more atoms
+1396052498.827656 hydrogen[1]: waiting for more atoms
+1396052498.827675 hydrogen[2]: waiting for more atoms
+1396052498.827705 oxygen[0]: starting a molecule
+1396052498.827683 hydrogen[4]: waiting for more atoms
+1396052498.829750 oxygen[0]: 	bonding
+1396052498.827669 hydrogen[3]: waiting for more atoms
+1396052498.829768 hydrogen[0]: 	bonding
+1396052498.829782 hydrogen[1]: 	bonding
+1396052498.829787 hydrogen[1]: finished a molecule
+1396052498.829794 oxygen[1]: starting a molecule
+1396052498.829800 oxygen[1]: 	bonding
+1396052498.829810 hydrogen[2]: 	bonding
+1396052498.829854 hydrogen[4]: 	bonding
+1396052498.829863 hydrogen[4]: finished a molecule
+1396052498.829869 oxygen[2]: waiting for more atoms
+
+1396052500.827799 main[0]: spawning more threads
+1396052500.827930 hydrogen[5]: starting a molecule
+1396052500.827974 hydrogen[5]: 	bonding
+1396052500.827984 oxygen[2]: 	bonding
+1396052500.828042 hydrogen[3]: 	bonding
+1396052500.828050 hydrogen[3]: finished a molecule
+1396052500.828056 oxygen[4]: waiting for more atoms
+
+1396052500.828071 oxygen[5]: waiting for more atoms
+
+1396052500.828084 hydrogen[9]: waiting for more atoms
+1396052500.828085 hydrogen[8]: starting a molecule
+1396052500.828105 hydrogen[8]: 	bonding
+1396052500.828110 hydrogen[9]: 	bonding
+1396052500.828116 oxygen[4]: 	bonding
+1396052500.828119 oxygen[4]: finished a molecule
+1396052500.828123 oxygen[3]: waiting for more atoms
+
+1396052500.828132 hydrogen[6]: waiting for more atoms
+1396052500.828134 hydrogen[7]: starting a molecule
+1396052500.828197 hydrogen[6]: 	bonding
+1396052500.828212 hydrogen[7]: 	bonding
+1396052500.828227 oxygen[5]: 	bonding
+1396052500.828235 oxygen[5]: finished a molecule
+1396052505.828130 main[0]: spawning more threads
+1396052505.828275 hydrogen[10]: waiting for more atoms
+1396052505.828300 hydrogen[11]: starting a molecule
+1396052505.828342 hydrogen[11]: 	bonding
+1396052505.828352 oxygen[3]: 	bonding
+1396052505.828374 hydrogen[10]: 	bonding
+1396052505.828399 hydrogen[10]: finished a molecule
+1396052505.828425 hydrogen[12]: waiting for more atoms
+1396052505.828439 hydrogen[14]: waiting for more atoms
+1396052505.828491 hydrogen[13]: waiting for more atoms
+1396052505.828496 oxygen[6]: starting a molecule
+1396052505.828524 oxygen[6]: 	bonding
+1396052505.828543 hydrogen[12]: 	bonding
+1396052505.828563 hydrogen[13]: 	bonding
+1396052505.828584 hydrogen[13]: finished a molecule
+1396052505.828604 oxygen[7]: waiting for more atoms
+
+1396052505.828627 oxygen[8]: waiting for more atoms
+
+1396052509.828450 main[0]: spawning more threads
+1396052509.828591 hydrogen[15]: starting a molecule
+1396052509.828634 hydrogen[15]: 	bonding
+1396052509.828644 oxygen[7]: 	bonding
+1396052509.828681 hydrogen[14]: 	bonding
+1396052509.828703 hydrogen[14]: finished a molecule
+1396052509.828727 hydrogen[16]: waiting for more atoms
+1396052509.828731 hydrogen[17]: starting a molecule
+1396052509.828793 hydrogen[17]: 	bonding
+1396052509.828804 oxygen[8]: 	bonding
+1396052509.828834 hydrogen[16]: 	bonding
+1396052509.828850 hydrogen[16]: finished a molecule
+1396052509.828876 hydrogen[19]: waiting for more atoms
+1396052509.828888 hydrogen[18]: waiting for more atoms
+1396052509.828893 oxygen[9]: starting a molecule
+1396052509.828941 oxygen[9]: 	bonding
+1396052509.828956 hydrogen[19]: 	bonding
+1396052509.828983 hydrogen[18]: 	bonding
+1396052509.828993 hydrogen[18]: finished a molecule
+1396052509.829007 oxygen[10]: waiting for more atoms
+
+1396052509.829031 oxygen[11]: waiting for more atoms
+
+1396052510.828806 main[0]: spawning more threads
+1396052510.828947 hydrogen[20]: waiting for more atoms
+1396052510.828969 hydrogen[21]: starting a molecule
+1396052510.829068 hydrogen[21]: 	bonding
+1396052510.829083 oxygen[10]: 	bonding
+1396052510.829102 hydrogen[20]: 	bonding
+1396052510.829126 hydrogen[20]: finished a molecule
+1396052510.829150 hydrogen[23]: waiting for more atoms
+1396052510.829154 hydrogen[22]: starting a molecule
+1396052510.829210 hydrogen[22]: 	bonding
+1396052510.829245 hydrogen[23]: 	bonding
+1396052510.829270 oxygen[11]: 	bonding
+1396052510.829292 oxygen[11]: finished a molecule
+1396052510.829313 hydrogen[24]: waiting for more atoms
+1396052510.829323 oxygen[12]: waiting for more atoms
+
+1396052510.829358 oxygen[13]: waiting for more atoms
+
+1396052510.829376 oxygen[14]: waiting for more atoms
+
+1396052513.829133 main[0]: spawning more threads
+1396052513.829273 hydrogen[25]: starting a molecule
+1396052513.829314 hydrogen[25]: 	bonding
+1396052513.829323 oxygen[12]: 	bonding
+1396052513.829349 hydrogen[24]: 	bonding
+1396052513.829374 hydrogen[24]: finished a molecule
+1396052513.829400 oxygen[16]: waiting for more atoms
+
+1396052513.829401 hydrogen[26]: waiting for more atoms
+1396052513.829445 hydrogen[28]: starting a molecule
+1396052513.829498 hydrogen[28]: 	bonding
+1396052513.829512 hydrogen[26]: 	bonding
+1396052513.829528 oxygen[13]: 	bonding
+1396052513.829541 oxygen[13]: finished a molecule
+1396052513.829561 hydrogen[29]: waiting for more atoms
+1396052513.829567 oxygen[15]: waiting for more atoms
+
+1396052513.829611 hydrogen[27]: starting a molecule
+1396052513.829637 hydrogen[29]: 	bonding
+1396052513.829658 hydrogen[27]: 	bonding
+1396052513.829676 oxygen[14]: 	bonding
+1396052513.829692 oxygen[14]: finished a molecule
+1396052513.829711 oxygen[17]: waiting for more atoms
+
+1396052515.829521 main[0]: spawning more threads
+1396052515.829663 hydrogen[30]: waiting for more atoms
+1396052515.829675 hydrogen[32]: starting a molecule
+1396052515.829764 main[0]: spawning more threads
+1396052515.829778 hydrogen[32]: 	bonding
+1396052515.829797 hydrogen[30]: 	bonding
+1396052515.829833 oxygen[16]: 	bonding
+1396052515.829855 oxygen[16]: finished a molecule
+1396052515.829863 hydrogen[36]: waiting for more atoms
+1396052515.829873 hydrogen[31]: starting a molecule
+1396052515.829903 hydrogen[36]: 	bonding
+1396052515.829927 hydrogen[31]: 	bonding
+1396052515.829941 oxygen[15]: 	bonding
+1396052515.829971 oxygen[15]: finished a molecule
+1396052515.830026 hydrogen[34]: starting a molecule
+1396052515.830048 hydrogen[34]: 	bonding
+1396052515.830069 oxygen[17]: 	bonding
+1396052515.830168 hydrogen[33]: waiting for more atoms
+1396052515.830192 hydrogen[33]: 	bonding
+1396052515.830203 hydrogen[33]: finished a molecule
+1396052515.830226 oxygen[18]: waiting for more atoms
+
+1396052515.830256 oxygen[19]: waiting for more atoms
+
+1396052515.830290 hydrogen[35]: waiting for more atoms
+1396052515.830296 hydrogen[37]: starting a molecule
+1396052515.830334 hydrogen[35]: 	bonding
+1396052515.830356 hydrogen[37]: 	bonding
+1396052515.830377 oxygen[18]: 	bonding
+1396052515.830392 oxygen[18]: finished a molecule
+1396052515.830418 hydrogen[38]: waiting for more atoms
+1396052515.830424 hydrogen[39]: starting a molecule
+1396052515.830475 hydrogen[38]: 	bonding
+1396052515.830494 hydrogen[39]: 	bonding
+1396052515.830511 oxygen[19]: 	bonding
+1396052515.830526 oxygen[19]: finished a molecule
+All threads have finished

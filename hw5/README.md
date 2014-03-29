@@ -22,3 +22,9 @@ is also included below for convenience.
 `--oxygen (-o)`: Number of oxygen threads to spawn at a time (defaults to 3)
 `--seed (-s)`: Seed for random number generator (defaults to current time)
 
+# Results
+
+The output of the program running with the default settings is contained within `output.txt`. This was obtained
+with the command `./main > output.txt`. A version executed with script is contained within `script_output.txt`.
+They should be identical, however, in previous assignments certain system calls did not work in script so I have
+provided both versions.
