@@ -4,6 +4,8 @@
 #include <unistd.h>
 #include <semaphore.h>
 #include <getopt.h>
+#include <time.h>
+#include <sys/time.h>
 
 sem_t o_sem, h_sem;
 pthread_mutex_t mutex, b_mutex;
@@ -12,14 +14,23 @@ int h_count = 0, o_count = 0, b_count = 0;
 
 void print_usage();
 
+void print_message(char* type, int id, char* message)
+{
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  
+  printf("%d.%d %s[%d]: %s\n", (int)tv.tv_sec, (int)tv.tv_usec, type, id, message);
+  fflush(stdout);
+}
+
 void* oxygenThread(void* input)
 {
+        int thread_id = *((int*)input);
 	pthread_mutex_lock(&mutex);
 	o_count++;
 	if(h_count >= 2)
 	{
-		printf("starting a molecule\n");
-		fflush(stdout);
+		print_message("oxygen", thread_id, "starting a molecule"); 
 		sem_post(&h_sem);
 		sem_post(&h_sem);
 		h_count -= 2;
@@ -28,19 +39,18 @@ void* oxygenThread(void* input)
 	}
 	else
 	{
+		print_message("oxygen", thread_id, "waiting for more atoms\n");
 		pthread_mutex_unlock(&mutex);
 	}
 
 	sem_wait(&o_sem);
 
 	pthread_mutex_lock(&b_mutex);
-	printf("\toxygen[%d] is bonding\n", *((int*)input));
-	fflush(stdout);
+	print_message("oxygen", thread_id, "\tbonding");
 	b_count++;
 	if(b_count == 3)
 	{
-		printf("finished a molecule\n");
-		fflush(stdout);
+		print_message("oxygen", thread_id, "finished a molecule");
 		b_count = 0;
 		pthread_mutex_unlock(&mutex);
 	}
@@ -52,12 +62,12 @@ void* oxygenThread(void* input)
 
 void* hydrogenThread(void* input)
 {
+        int thread_id = *((int*)input);
 	pthread_mutex_lock(&mutex);
 	h_count++;
 	if(h_count >=2 && o_count >= 1)
 	{
-		printf("starting a molecule\n");
-		fflush(stdout);
+		print_message("hydrogen", thread_id, "starting a molecule");
 		sem_post(&h_sem);
 		sem_post(&h_sem);
 		h_count -= 2;
@@ -67,18 +77,17 @@ void* hydrogenThread(void* input)
 	else
 	{
 		pthread_mutex_unlock(&mutex);
+		print_message("hydrogen", thread_id, "waiting for more atoms");
 	}
 
 	sem_wait(&h_sem);
 
 	pthread_mutex_lock(&b_mutex);
-	printf("\thydrogen[%d] is bonding\n", *((int*)input));
-	fflush(stdout);
+	print_message("hydrogen", thread_id, "\tbonding");
 	b_count++;
 	if(b_count == 3)
 	{
-		printf("finished a molecule\n");
-		fflush(stdout);
+		print_message("hydrogen", thread_id, "finished a molecule");
 		b_count = 0;
 		pthread_mutex_unlock(&mutex);
 	}
@@ -90,7 +99,7 @@ void* hydrogenThread(void* input)
 
 int main(int argc, char** argv)
 {
-	static struct option long_options[] = {
+	static struct option int_options[] = {
 		{"molecules", required_argument, 0, 'm'}, // total number of molecules for the run
 		{"hydrogen", required_argument, 0, 'h'}, // total number of hydrogen to spawn at a time
 		{"oxygen", required_argument, 0, 'o'}, // total number of oxygen to spawn at a time
@@ -101,7 +110,7 @@ int main(int argc, char** argv)
 	int num_hydrogen = 5;
 	int num_oxygen = 3;
 
-	srand(time(NULL));
+	srand((int)time(NULL));
 
 	printf("\n");
 	printf("EECS 338 HW5\n");
@@ -110,9 +119,9 @@ int main(int argc, char** argv)
 	fflush(stdout);
 
 	// parse arguments
-	int long_index = 0;
+	int int_index = 0;
 	char opt;
-	while((opt = getopt_long(argc, argv, "m:h:o:s:", long_options, &long_index)) != -1) {
+	while((opt = getopt_long(argc, argv, "m:h:o:s:", int_options, &int_index)) != -1) {
 		switch(opt) {
 		case 'm':
 			num_molecules = atoi(optarg);
@@ -166,10 +175,14 @@ int main(int argc, char** argv)
 
 	int hydrogen_spawned = 0;
 	int oxygen_spawned = 0;
+	struct timeval tv;
 	while(hydrogen_spawned + oxygen_spawned < 3*num_molecules)
 	{
 		sleep(rand() % 6); // sleep for a random amount of time
 
+		gettimeofday(&tv, NULL);
+		print_message("main", 0, "spawning more threads");
+		
 		int i;
 		for(i=0; i<num_hydrogen && hydrogen_spawned < 2*num_molecules; i++)
 		{
