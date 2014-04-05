@@ -23,38 +23,74 @@ void print_message(char* type, int id, char* message)
   fflush(stdout);
 }
 
+void checked_sem_wait(sem_t* sem)
+{
+  if(sem_wait(sem) != 0)
+  {
+    perror("sem_wait failed: ");
+    exit(1);
+  }
+}
+
+void checked_sem_post(sem_t* sem)
+{
+  if(sem_post(sem) != 0)
+  {
+    perror("sem_post failed: ");
+    exit(1);
+  }
+}
+
+void checked_pthread_mutex_lock(pthread_mutex_t* mutex)
+{
+  if(pthread_mutex_lock(mutex) != 0)
+  {
+    perror("pthread_mutex_lock failed: ");
+    exit(1);
+  }
+}
+
+void checked_pthread_mutex_unlock(pthread_mutex_t* mutex)
+{
+  if(pthread_mutex_unlock(mutex) != 0)
+  {
+    perror("pthread_mutex_unlock failed: ");
+    exit(1);
+  }
+}
+
 void* oxygenThread(void* input)
 {
         int thread_id = *((int*)input);
-	pthread_mutex_lock(&mutex);
+	checked_pthread_mutex_lock(&mutex);
 	o_count++;
 	if(h_count >= 2)
 	{
 		print_message("oxygen", thread_id, "starting a molecule"); 
-		sem_post(&h_sem);
-		sem_post(&h_sem);
+		checked_sem_post(&h_sem);
+		checked_sem_post(&h_sem);
 		h_count -= 2;
-		sem_post(&o_sem);
+		checked_sem_post(&o_sem);
 		o_count--;
 	}
 	else
 	{
 		print_message("oxygen", thread_id, "waiting for more atoms\n");
-		pthread_mutex_unlock(&mutex);
+		checked_pthread_mutex_unlock(&mutex);
 	}
 
-	sem_wait(&o_sem);
+	checked_sem_wait(&o_sem);
 
-	pthread_mutex_lock(&b_mutex);
+	checked_pthread_mutex_lock(&b_mutex);
 	print_message("oxygen", thread_id, "\tbonding");
 	b_count++;
 	if(b_count == 3)
 	{
 		print_message("oxygen", thread_id, "finished a molecule");
 		b_count = 0;
-		pthread_mutex_unlock(&mutex);
+		checked_pthread_mutex_unlock(&mutex);
 	}
-	pthread_mutex_unlock(&b_mutex);
+	checked_pthread_mutex_unlock(&b_mutex);
 
 	free((int*)input);
 	return (void*)NULL;
@@ -63,35 +99,35 @@ void* oxygenThread(void* input)
 void* hydrogenThread(void* input)
 {
         int thread_id = *((int*)input);
-	pthread_mutex_lock(&mutex);
+	checked_pthread_mutex_lock(&mutex);
 	h_count++;
 	if(h_count >=2 && o_count >= 1)
 	{
 		print_message("hydrogen", thread_id, "starting a molecule");
-		sem_post(&h_sem);
-		sem_post(&h_sem);
+		checked_sem_post(&h_sem);
+		checked_sem_post(&h_sem);
 		h_count -= 2;
-		sem_post(&o_sem);
+		checked_sem_post(&o_sem);
 		o_count--;
 	}
 	else
 	{
-		pthread_mutex_unlock(&mutex);
+		checked_pthread_mutex_unlock(&mutex);
 		print_message("hydrogen", thread_id, "waiting for more atoms");
 	}
 
-	sem_wait(&h_sem);
+	checked_sem_wait(&h_sem);
 
-	pthread_mutex_lock(&b_mutex);
+	checked_pthread_mutex_lock(&b_mutex);
 	print_message("hydrogen", thread_id, "\tbonding");
 	b_count++;
 	if(b_count == 3)
 	{
 		print_message("hydrogen", thread_id, "finished a molecule");
 		b_count = 0;
-		pthread_mutex_unlock(&mutex);
+		checked_pthread_mutex_unlock(&mutex);
 	}
-	pthread_mutex_unlock(&b_mutex);
+	checked_pthread_mutex_unlock(&b_mutex);
 	
 	free((int*)input);
 	return (void*)NULL;
@@ -212,11 +248,19 @@ int main(int argc, char** argv)
 	int i;
 	for(i=0; i<hydrogen_spawned; i++)
 	{
-		pthread_join(hydrogen_threads[i], (void**)pstatus);
+	  if(pthread_join(hydrogen_threads[i], (void**)pstatus) != 0)
+	  {
+	    perror("pthread_join hydrogen thread failed: ");
+	    exit(1);
+	  }
 	}
 	for(i=0; i<oxygen_spawned; i++)
 	{
-		pthread_join(oxygen_threads[i], (void**)pstatus);
+	  if(pthread_join(oxygen_threads[i], (void**)pstatus) != 0)
+	  {
+	    perror("pthread_join oxygen thread failed: ");
+	    exit(1);
+	  }
 	}
 
 	printf("All threads have finished\n");
