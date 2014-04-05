@@ -1,7 +1,10 @@
 \#*\#
 *~
 *.bin
-main
+
+tina
+judy
+mother
 
 # RPC generated files
 Cookie.h
