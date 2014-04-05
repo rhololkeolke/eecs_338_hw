@@ -2,3 +2,8 @@
 *~
 *.bin
 main
+
+# RPC generated files
+Cookie.h
+Cookie_clnt.c
+Cookie_svc.c
