@@ -2,33 +2,46 @@
 #include "Cookie.h"
 #include <rpc/rpc.h>
 
-int* increment_1(int* value, CLIENT* client)
-{
-	static int result;
-	printf("Calling increment with %d\n", *value);
+static int num_cookies = 20;
+static int tina_count = 0;
+static int shutdown_count = 0;
 
-	result = *value + 1;
-	return &result;
-}
-
-int* increment_1_svc(int* value, struct svc_req* req)
-{
-	CLIENT* client = NULL;
-	return (increment_1(value, client));
-}
-
-int* decrement_1(int* value, CLIENT* client)
+int* get_my_cookie_1(int* which_child, CLIENT* client)
 {
 	static int result;
 
-	printf("Calling decrement with %d\n", *value);
-
-	result = *value - 1;
-	return &result;
+	if(num_cookies <= 0)
+	{
+		result = -2;
+		return &result;
+	}
+	
+	if(*which_child == TINA)
+	{
+		num_cookies--;
+		tina_count++;
+		result = 1;
+		return &result;
+	}
+	else
+	{
+		if(tina_count < 2)
+		{
+			result = -1;
+			return &result;
+		}
+		else
+		{
+			num_cookies--;
+			tina_count = 0;
+			result = 1;
+			return &result;
+		}
+	}
 }
 
-int* decrement_1_svc(int* value, struct svc_req* req)
+int* get_my_cookie_1_svc(int* which_child, struct svc_req* req)
 {
 	CLIENT* client = NULL;
-	return (decrement_1(value, client));
+	return (get_my_cookie_1(which_child, client));
 }

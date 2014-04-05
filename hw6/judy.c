@@ -2,20 +2,20 @@
 #include <rpc/rpc.h>
 #include "Cookie.h"
 
+const int ID = 0;
+
 int main(int argc, char** argv)
 {
 	printf("Starting judy\n");
 
 	char* server;
-	int value;
-	if(argc != 3)
+	if(argc != 2)
 	{
-		fprintf(stderr, "usage: %s <host> <int>\n", argv[0]);
+		fprintf(stderr, "usage: %s <host>\n", argv[0]);
 		exit(1);
 	}
 
 	server = argv[1];
-	value = atoi(argv[2]);
 
 	// create client handle
 	CLIENT* client = clnt_create(server, COOKIE_PROGRAM, COOKIE_V1, "udp");
@@ -24,23 +24,14 @@ int main(int argc, char** argv)
 		clnt_pcreateerror(server);
 		exit(1);
 	}
-	int* result = increment_1(&value, client);
+	int* result = get_my_cookie_1((int*)(&ID), client);
 	if(result == (int*)NULL)
 	{
 		clnt_perror(client, server);
 		exit(1);
 	}
 
-	printf("Increment result: %d\n", *result);
-
-	result = decrement_1(&value, client);
-	if(result == (int*)NULL)
-	{
-		clnt_perror(client, server);
-		exit(1);
-	}
-
-	printf("Decrement result: %d\n", *result);
+	printf("Get My Cookie result: %d\n", *result);
 
 	clnt_destroy(client);
 	
