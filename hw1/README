@@ -1,0 +1,55 @@
+Devin Schwab (dts34)
+EECS 338 HW 1
+2/7/14
+
+Submission Files
+-----------------
+Makefile
+hw1.c
+hw1_script_output.txt (output recorded with script command, see below)
+hw1_record_output.txt (output recorded with stdout/stderr redirects, see below)
+
+Compiling
+-----------
+
+To compile you can simply run `make`
+To remove the compiled files run `make clean`
+
+Running the Program
+--------------------
+
+To run the program simply type `./hw1`.
+
+Variable A Behavior
+---------------------
+A is initialized to 100 in the main thread. Then the main thread forks 3 times to create 3 child processes.
+When fork is called it creates a child process with the same state as the parent, but this new process is a copy.
+So when the first child process updates A to be 200 it updates only its copy. Which means after the first update
+the main process, and child processes 2 and 3 still have A set to 100, while child process 1 has it set to 200.
+A similar thing happens when child processes 2 and 3 update A.
+
+In all cases only the child process's own variable A  is updated. So each child process prints that the value of A is 200 and at the end of the program when main prints A it still shows
+100. This is because main's copy of A was never modified.
+
+Generating Program Output Logs
+-------------------------------------
+
+There are also additional make targets `script_record`, and `redirect_record`.
+
+`redirect_record` redirects stdout and stderr to a file called `hw1_redirect_output`. This is the
+better of the two records to use as bash remains the controlling process meaning that `getlogin()`
+will be successful, unlike in script.
+
+`script_record` uses script to record the program output. To use type `make script_record`.
+This will create a file called `hw1_script_output.txt`. Please note that script breaks
+`getlogin()` because script becomes the controlling process and script is not a valid
+login terminal. Therefore the script output will contain an error message for the username line
+
+Notes
+--------
+
+I was originally having issues having `getlogin()` be successful. It turns out that `getlogin()`
+only works when the process is running from a valid login terminal. This means that if you run
+the programs from within something such as tmux or screen it will not work properly. It also means
+that running from within script will not work properly. If you see an error message please try running
+it straight from bash with a valid login terminal.
