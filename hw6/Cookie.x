@@ -4,5 +4,6 @@ const TINA = 1;
 program COOKIE_PROGRAM {
 	version COOKIE_V1 {
 		int GET_MY_COOKIE(int which_child) = 1;
+		int SHUTDOWN(int which_child) = 2;
 	} = 1;
 } = 62981;

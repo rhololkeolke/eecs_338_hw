@@ -33,6 +33,11 @@ int main(int argc, char** argv)
 
 	printf("Get my cookie result: %d\n", *result);
 
+	if(*result == -2)
+	{
+		shutdown_1((int*)(&ID), client);
+	}
+
 	clnt_destroy(client);
 	
 	return 0;

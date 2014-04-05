@@ -4,7 +4,7 @@
 
 static int num_cookies = 20;
 static int tina_count = 0;
-static int shutdown_count = 0;
+static char shutdown_requests[2] = {0, 0};
 
 int* get_my_cookie_1(int* which_child, CLIENT* client)
 {
@@ -44,4 +44,24 @@ int* get_my_cookie_1_svc(int* which_child, struct svc_req* req)
 {
 	CLIENT* client = NULL;
 	return (get_my_cookie_1(which_child, client));
+}
+
+int* shutdown_1(int* which_child, CLIENT* client)
+{
+	static shutdown = 0;
+	printf("Received a shutdown request\n");
+	shutdown_requests[*which_child] = 1;
+	if(shutdown_requests[0] && shutdown_requests[1])
+	{
+		printf("Mother is shutting down\n");
+		exit(0);
+	}
+
+	return &shutdown;
+}
+
+int* shutdown_1_svc(int* which_child, struct svc_req* req)
+{
+	CLIENT* client = NULL;
+	return (shutdown_1(which_child, client));
 }
