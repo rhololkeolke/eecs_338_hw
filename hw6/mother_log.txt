@@ -1,0 +1,35 @@
+1397376568.863684 cookies: 20 [mother] Judy wait your turn. Your sister gets to have a cookie first
+1397376574.864428 cookies: 20 [mother] Judy wait your turn. Your sister gets to have a cookie first
+1397376576.374367 cookies: 19 [mother] Here you go Tina have a cookie
+1397376578.375106 cookies: 18 [mother] Here you go Tina have a cookie
+1397376580.375823 cookies: 17 [mother] Here you go Tina have a cookie
+1397376583.865151 cookies: 16 [mother] Here you go Judy have a cookie
+1397376585.865920 cookies: 16 [mother] Judy wait your turn. Your sister gets to have a cookie first
+1397376588.376801 cookies: 15 [mother] Here you go Tina have a cookie
+1397376593.377655 cookies: 14 [mother] Here you go Tina have a cookie
+1397376594.378249 cookies: 13 [mother] Here you go Tina have a cookie
+1397376594.866824 cookies: 12 [mother] Here you go Judy have a cookie
+1397376594.867309 cookies: 12 [mother] Judy wait your turn. Your sister gets to have a cookie first
+1397376599.379168 cookies: 11 [mother] Here you go Tina have a cookie
+1397376600.868099 cookies: 11 [mother] Judy wait your turn. Your sister gets to have a cookie first
+1397376600.868528 cookies: 11 [mother] Judy wait your turn. Your sister gets to have a cookie first
+1397376602.379964 cookies: 10 [mother] Here you go Tina have a cookie
+1397376602.869242 cookies: 9 [mother] Here you go Judy have a cookie
+1397376602.869694 cookies: 9 [mother] Judy wait your turn. Your sister gets to have a cookie first
+1397376604.380719 cookies: 8 [mother] Here you go Tina have a cookie
+1397376605.870342 cookies: 8 [mother] Judy wait your turn. Your sister gets to have a cookie first
+1397376607.871106 cookies: 8 [mother] Judy wait your turn. Your sister gets to have a cookie first
+1397376608.381601 cookies: 7 [mother] Here you go Tina have a cookie
+1397376608.382035 cookies: 6 [mother] Here you go Tina have a cookie
+1397376608.871825 cookies: 5 [mother] Here you go Judy have a cookie
+1397376610.872466 cookies: 5 [mother] Judy wait your turn. Your sister gets to have a cookie first
+1397376613.382821 cookies: 4 [mother] Here you go Tina have a cookie
+1397376613.383219 cookies: 3 [mother] Here you go Tina have a cookie
+1397376616.384029 cookies: 2 [mother] Here you go Tina have a cookie
+1397376616.384438 cookies: 1 [mother] Here you go Tina have a cookie
+1397376618.873279 cookies: 0 [mother] Here you go Judy have a cookie
+1397376620.874069 cookies: 0 [mother] Sorry kids all out of cookies
+1397376620.874495 [mother] Received a shutdown request
+1397376625.385495 cookies: 0 [mother] Sorry kids all out of cookies
+1397376625.385901 [mother] Received a shutdown request
+1397376625.385904 [mother] Mother is shutting down
